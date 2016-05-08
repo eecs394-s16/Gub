@@ -3,7 +3,7 @@
 // angular.module is a global place for creating, registering and retrieving Angular modules
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
-angular.module('starter', ['ionic'])
+angular.module('starter', ['ionic', 'firebase'])
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
@@ -22,3 +22,40 @@ angular.module('starter', ['ionic'])
     }
   });
 })
+
+.factory('Auth', function($firebaseAuth) {
+  var usersRef = new Firebase("https//gub.firebaseio.com/users");
+  return $firebaseAuth(usersRef);
+})
+
+.controller('LoginCtrl', function($scope, Auth) {
+  $scope.login = function() {
+    Auth.$authWithOAuthRedirect("facebook").then(function(authData) {
+      // User successfully logged in
+    }).catch(function(error) {
+      if (error.code === "TRANSPORT_UNAVAILABLE") {
+        Auth.$authWithOAuthPopup("facebook").then(function(authData) {
+          // User successfully logged in. We can log to the console
+          // since we’re using a popup here
+        });
+      } else {
+        // Another error occurred
+        console.log(error);
+      }
+    });
+  };
+
+  $scope.logout = function() {
+    Auth.$unauth();
+  };
+
+  Auth.$onAuth(function(authData) {
+    if (authData === null) {
+      console.log("Not logged in yet");
+    } else {
+      console.log("Logged in as", authData.uid);
+    }
+    $scope.authData = authData;
+  });
+
+});
