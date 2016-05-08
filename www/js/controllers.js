@@ -45,16 +45,17 @@ angular.module('starter.controllers', ['ionic', 'firebase', 'ngTagsInput'])
 
 
 
-
   var firebaseObj = new Firebase('https://gub.firebaseio.com/');
   var fb = $firebase(firebaseObj);
 
   $scope.showAlert = function() {
     $ionicPopup.alert({
         title: 'Gub',
-        template: 'Your location has been saved!!'
+        template: 'Post submitted!!'
     });
   };
+
+
   $scope.pushPost = function(){
     var match = "?";
     //for (var i = 0; i < $scope.post.match_toggles.length; i += 1) {
@@ -65,7 +66,9 @@ angular.module('starter.controllers', ['ionic', 'firebase', 'ngTagsInput'])
       category: $scope.post.category,
       start_date: $scope.post.start_date,
       end_date: $scope.post.start_date,
-
+      match_option: $scope.post.current_match,
+      object: $scope.post.object,
+      tags: $scope.post.tags,
       location: {latitude: $scope.user.latitude, longtitude: $scope.user.longitude},
       description: $scope.user.desc
       }).then(function(ref){

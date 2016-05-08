@@ -38,8 +38,12 @@
           {{option[0]}} -->
 
           <div class="button-bar">
-            <button class="button" ng-click="setCurrentMatch('Buy')" ng-class="{'button-positive': isCurrentMatch('Buy') }">Buy</button>
-            <button class="button" ng-click="setCurrentMatch('Sell')" ng-class="{'button-positive': isCurrentMatch('Sell') }">Sell</button>
+            <button class="button" ng-click="setCurrentMatch('Buy')"
+             ng-class="{'button-positive': isCurrentMatch('Buy') }"
+             >Buy</button>
+            <button class="button" ng-click="setCurrentMatch('Sell')"
+            ng-class="{'button-positive': isCurrentMatch('Sell') }"
+            >Sell</button>
           </div>
 
           <!-- {{option[0]}}
@@ -56,7 +60,6 @@
      </label>
 
      <tags-input ng-model="post.tags"></tags-input>
-     <p>Model: {{post.tags}}</p>
 
 
      <div>
