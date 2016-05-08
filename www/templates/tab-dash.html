@@ -30,17 +30,46 @@
       </label>
       <!-- this part is essentially broken; looking for a way to walk around -->
       <label class="item">
-        <div ng-repeat="option in match_options">
-          {{option[0]}}
+        {{post.current_match}}
+
+
+
+        <!-- <div ng-repeat="option in match_options">
+          {{option[0]}} -->
+
+          <div class="button-bar">
+            <button class="button" ng-click="setCurrentMatch('Buy')" ng-class="{'button-positive': isCurrentMatch('Buy') }">Buy</button>
+            <button class="button" ng-click="setCurrentMatch('Sell')" ng-class="{'button-positive': isCurrentMatch('Sell') }">Sell</button>
+          </div>
+
+          <!-- {{option[0]}}
           <label class="toggle">
-            <input type="checkbox" ng-value="match_toggles[$index]" ng-click="ToggleMatchOption($index)">
+            <input type="checkbox" ng-value="post.match_toggles[$index]" ng-click="ToggleMatchOption($index)">
             <div class="track"> <div class="handle"></div></div>
           </label>
-          {{option[1]}}
-        </div>
-
+          {{option[1]}} -->
+        <!-- </div> -->
+     </label>
+     <label class="item item-input item-stacked-label">
+       <span class="input-label">Object</span>
+       <input type="text" ng-model="post.object" placeholder="Object">
      </label>
 
+     <tags-input ng-model="post.tags"></tags-input>
+     <p>Model: {{post.tags}}</p>
+
+
+     <div>
+         <div id="map" lat="42.059157" lng="-87.673853" zoom="8" map>
+         </div>
+
+         <div width="80%" class="list list-inset" style="margin-left:10%;margin-right:10%;">
+             <label class="item item-input">
+                 <input type="text" ng-model="user.desc" placeholder="Set Your Location">
+             </label>
+         <button class="button button-full button-positive" ng-click="pushPost()">Post It</button>
+         </div>
+     </div>
 
 
     </div>

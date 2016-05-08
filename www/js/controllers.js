@@ -1,12 +1,15 @@
-angular.module('starter.controllers', ['ionic', 'firebase'])
+angular.module('starter.controllers', ['ionic', 'firebase', 'ngTagsInput'])
 
-.controller('DashCtrl', function($scope) {
+.controller('DashCtrl', ['$scope','$firebase','$ionicPopup', function($scope, $firebase, $ionicPopup) {
 
   //initialize the global variables for this view
   $scope.number = 0;
   $scope.post = {};
   $scope.match_options = [["Buy", "Sell"], ["Rent", "Lease"], ["Find", "Give"], ["Work", "Hire"], ["Do", "Task"], ["Join", "Recruit"], ["Meet", "Meet"]];
-  $scope.match_toggles = new Array(len).fill(false);
+  $scope.post.match_toggles = new Array($scope.match_options.length).fill(false);
+  $scope.post.current_match = "Lease";
+  $scope.user = {};
+  $scope.post.tags = [];
 
   getData();
 
@@ -17,12 +20,64 @@ angular.module('starter.controllers', ['ionic', 'firebase'])
     }, function (errorObject) {});
   }
 
-  function ToggleMatchOption(index) {
-    
-  }
+
+  $scope.isCurrentMatch = function(cm) {
+    console.log("called isCurrentMatch\n"+cm);
+    return $scope.post.current_match === cm;
+  };
 
 
-})
+  $scope.setCurrentMatch = function(type) {
+    console.log("calling setCurrentMatch\n"+type);
+    $scope.post.current_match = type;
+  };
+
+  $scope.ToggleMatchOption = function(index) {
+    $scope.post.match_toggles[index] = !$scope.post.match_toggles[index];
+    for (var i = 0; i < $scope.post.match_toggles.length; i += 1) {
+      if (i != index) $scope.post.match_toggles[i] = false;
+    }
+    console.log($scope.post.match_toggles);
+  };
+
+
+
+
+
+
+
+  var firebaseObj = new Firebase('https://gub.firebaseio.com/');
+  var fb = $firebase(firebaseObj);
+
+  $scope.showAlert = function() {
+    $ionicPopup.alert({
+        title: 'Gub',
+        template: 'Your location has been saved!!'
+    });
+  };
+  $scope.pushPost = function(){
+    var match = "?";
+    //for (var i = 0; i < $scope.post.match_toggles.length; i += 1) {
+      //if ($scope.post.match_toggles[i])
+    fb.$push({
+      headline: $scope.post.headline,
+      description: $scope.post.description,
+      category: $scope.post.category,
+      start_date: $scope.post.start_date,
+      end_date: $scope.post.start_date,
+
+      location: {latitude: $scope.user.latitude, longtitude: $scope.user.longitude},
+      description: $scope.user.desc
+      }).then(function(ref){
+        $scope.user = {};
+        $scope.showAlert();
+      }, function(error) {
+        console.log("Error:", error);
+    });
+  };
+
+
+}])
 
 .controller('ChatsCtrl', function($scope, Chats) {
   // With the new view caching in Ionic, Controllers are only called
@@ -49,8 +104,9 @@ angular.module('starter.controllers', ['ionic', 'firebase'])
   };
 })
 
+/*
 .controller('MapCtrl', ['$scope','$firebase','$ionicPopup', function($scope,$firebase,$ionicPopup) {
-  $scope.user = {};
+  $scope.user = {test: "test"};
   var firebaseObj = new Firebase('https://gub.firebaseio.com/');
   var fb = $firebase(firebaseObj);
   $scope.showAlert = function() {
@@ -58,7 +114,7 @@ angular.module('starter.controllers', ['ionic', 'firebase'])
         title: 'Gub',
         template: 'Your location has been saved!!'
     });
-};
+  };
   $scope.saveDetails = function(){
     var lat = $scope.user.latitude;
     var lgt = $scope.user.longitude;
@@ -70,8 +126,9 @@ angular.module('starter.controllers', ['ionic', 'firebase'])
       }, function(error) {
         console.log("Error:", error);
     });
-  }  
+  }
 }])
+*/
 
 .directive('map', function() {
     return {
