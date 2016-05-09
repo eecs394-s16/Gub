@@ -60,7 +60,7 @@ angular.module('starter', ['ionic', 'firebase', 'ngTagsInput'])
 
 })
 
-.controller('DashCtrl', ['$scope','$firebase','$ionicPopup', function($scope, $firebase, $ionicPopup) {
+.controller('DashCtrl', ['$scope','$firebaseObject','$ionicPopup', function($scope, $firebaseObject, $ionicPopup) {
 
   //initialize the global variables for this view
   $scope.number = 0;
@@ -101,7 +101,7 @@ angular.module('starter', ['ionic', 'firebase', 'ngTagsInput'])
   };
 
   var firebaseObj = new Firebase('https://gub.firebaseio.com/');
-  var fb = $firebase(firebaseObj);
+  var fb = $firebaseObject(firebaseObj);
 
   $scope.showAlert = function() {
     $ionicPopup.alert({
