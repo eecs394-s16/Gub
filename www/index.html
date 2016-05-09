@@ -8,6 +8,9 @@
   <link href="lib/ionic/css/ionic.css" rel="stylesheet">
   <link href="css/style.css" rel="stylesheet">
 
+  <!-- Google Maps -->
+  <link rel="stylesheet" href="http://mbenford.github.io/ngTagsInput/css/ng-tags-input.min.css"/>
+  <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
   <!-- IF using Sass (run gulp sass first), then uncomment below and remove the CSS includes above
   <link href="css/ionic.app.css" rel="stylesheet">
 -->
@@ -22,6 +25,8 @@
 <script src="lib/firebase/firebase-debug.js"></script>
 <!-- AngularFire -->
 <script src="lib/angularfire/dist/angularfire.js"></script>
+<!-- Custom Directive -->
+<script src="http://mbenford.github.io/ngTagsInput/js/ng-tags-input.min.js"></script>
 
 <!-- your app's js -->
 <script src="js/app.js"></script>
@@ -51,11 +56,93 @@
           <button class="item" ng-click="logout()">
             Logout
           </button>
+
         </div>
-        
+
+        <div ng-show="authData">
+          <div ng-controller="DashCtrl">
+            <!-- Create an Ad -->
+            <h2>Write a Post</h2>
+
+            <div class="list">
+              <label class="item item-input item-stacked-label">
+                <span class="input-label">Headline</span>
+                <input type="text" ng-model="post.headline" placeholder="Headline">
+              </label>
+              <label class="item item-input item-stacked-label">
+                <span class="input-label">Description</span>
+                <input type="text" ng-model="post.description" placeholder="Description">
+              </label>
+              <label class="item item-input item-select">
+                <div class="input-label"> Category</div>
+                <select ng-model="post.category">
+                  <option>Blue</option>
+                  <option selected>Yellow</option>
+                  <option>Red</option>
+                </select>
+              </label>
+              <!-- We should add Media somewhere here -->
+              <label class="item item-input">
+                <span class="input-label">Start</span>
+                <input type="date" ng-model="post.start_date">
+              </label>
+              <label class="item item-input">
+                <span class="input-label">End</span>
+                <input type="date" ng-model="post.end_date">
+              </label>
+              <!-- this part is essentially broken; looking for a way to walk around -->
+              <label class="item">
+                {{post.current_match}}
+
+
+
+                <!-- <div ng-repeat="option in match_options">
+                {{option[0]}} -->
+
+                <div class="button-bar">
+                  <button class="button" ng-click="setCurrentMatch('Buy')"
+                  ng-class="{'button-positive': isCurrentMatch('Buy') }"
+                  >Buy</button>
+                  <button class="button" ng-click="setCurrentMatch('Sell')"
+                  ng-class="{'button-positive': isCurrentMatch('Sell') }"
+                  >Sell</button>
+                </div>
+
+                <!-- {{option[0]}}
+                <label class="toggle">
+                <input type="checkbox" ng-value="post.match_toggles[$index]" ng-click="ToggleMatchOption($index)">
+                <div class="track"> <div class="handle"></div></div>
+              </label>
+              {{option[1]}} -->
+              <!-- </div> -->
+            </label>
+            <label class="item item-input item-stacked-label">
+              <span class="input-label">Object</span>
+              <input type="text" ng-model="post.object" placeholder="Object">
+            </label>
+
+            <tags-input ng-model="post.tags"></tags-input>
+
+
+            <div>
+              <div id="map" lat="42.059157" lng="-87.673853" zoom="8" map>
+              </div>
+
+              <div width="80%" class="list list-inset" style="margin-left:10%;margin-right:10%;">
+                <label class="item item-input">
+                  <input type="text" ng-model="user.desc" placeholder="Set Your Location">
+                </label>
+                <button class="button button-full button-positive" ng-click="pushPost()">Post It</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
       </div>
 
-    </ion-content>
-  </ion-pane>
+    </div>
+
+  </ion-content>
+</ion-pane>
 </body>
 </html>

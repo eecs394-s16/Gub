@@ -3,7 +3,7 @@
 // angular.module is a global place for creating, registering and retrieving Angular modules
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
-angular.module('starter', ['ionic', 'firebase'])
+angular.module('starter', ['ionic', 'firebase', 'ngTagsInput'])
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
@@ -58,4 +58,112 @@ angular.module('starter', ['ionic', 'firebase'])
     $scope.authData = authData;
   });
 
+})
+
+.controller('DashCtrl', ['$scope','$firebase','$ionicPopup', function($scope, $firebase, $ionicPopup) {
+
+  //initialize the global variables for this view
+  $scope.number = 0;
+  $scope.post = {};
+  $scope.match_options = [["Buy", "Sell"], ["Rent", "Lease"], ["Find", "Give"], ["Work", "Hire"], ["Do", "Task"], ["Join", "Recruit"], ["Meet", "Meet"]];
+  $scope.post.match_toggles = new Array($scope.match_options.length).fill(false);
+  $scope.post.current_match = "Lease";
+  $scope.user = {};
+  $scope.post.tags = [];
+
+  getData();
+
+  function getData() {
+    var ref = new Firebase('https://gub.firebaseio.com/');
+    ref.on("value", function(snapshot) {
+      $scope.number = snapshot.val();
+    }, function (errorObject) {});
+  }
+
+
+  $scope.isCurrentMatch = function(cm) {
+    console.log("called isCurrentMatch\n"+cm);
+    return $scope.post.current_match === cm;
+  };
+
+
+  $scope.setCurrentMatch = function(type) {
+    console.log("calling setCurrentMatch\n"+type);
+    $scope.post.current_match = type;
+  };
+
+  $scope.ToggleMatchOption = function(index) {
+    $scope.post.match_toggles[index] = !$scope.post.match_toggles[index];
+    for (var i = 0; i < $scope.post.match_toggles.length; i += 1) {
+      if (i != index) $scope.post.match_toggles[i] = false;
+    }
+    console.log($scope.post.match_toggles);
+  };
+
+  var firebaseObj = new Firebase('https://gub.firebaseio.com/');
+  var fb = $firebase(firebaseObj);
+
+  $scope.showAlert = function() {
+    $ionicPopup.alert({
+        title: 'Gub',
+        template: 'Post submitted!!'
+    });
+  };
+
+
+  $scope.pushPost = function(){
+    var match = "?";
+    //for (var i = 0; i < $scope.post.match_toggles.length; i += 1) {
+      //if ($scope.post.match_toggles[i])
+    fb.$push({
+      headline: $scope.post.headline,
+      description: $scope.post.description,
+      category: $scope.post.category,
+      start_date: $scope.post.start_date,
+      end_date: $scope.post.start_date,
+      match_option: $scope.post.current_match,
+      object: $scope.post.object,
+      tags: $scope.post.tags,
+      location: {latitude: $scope.user.latitude, longtitude: $scope.user.longitude},
+      description: $scope.user.desc
+      }).then(function(ref){
+        $scope.user = {};
+        $scope.showAlert();
+      }, function(error) {
+        console.log("Error:", error);
+    });
+  };
+
+
+}])
+
+
+.directive('map', function() {
+    return {
+        restrict: 'A',
+        link:function(scope, element, attrs){
+
+          var zValue = scope.$eval(attrs.zoom);
+          var lat = scope.$eval(attrs.lat);
+          var lng = scope.$eval(attrs.lng);
+          var myLatlng = new google.maps.LatLng(lat,lng),
+          mapOptions = {
+                zoom: zValue,
+                center: myLatlng
+            },
+          map = new google.maps.Map(element[0],mapOptions);
+          marker = new google.maps.Marker({
+            position: myLatlng,
+            map: map,
+            draggable:true
+          })
+          google.maps.event.addListener(marker, 'dragend', function(evt){
+            scope.$parent.user.latitude = evt.latLng.lat();
+            scope.$parent.user.longitude = evt.latLng.lng();
+            scope.$apply();
+
+          });
+
+        }
+    };
 });
