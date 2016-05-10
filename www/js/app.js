@@ -28,6 +28,11 @@ angular.module('starter', ['ionic', 'firebase', 'ngTagsInput'])
   return $firebaseAuth(usersRef);
 })
 
+.factory("AdRef", function($firebaseArray) {
+  var itemsRef = new Firebase("https://gub.firebaseio.com/ads");
+  return $firebaseArray(itemsRef);
+})
+
 .controller('LoginCtrl', function($scope, Auth) {
   $scope.login = function() {
     Auth.$authWithOAuthRedirect("facebook").then(function(authData) {
@@ -60,13 +65,12 @@ angular.module('starter', ['ionic', 'firebase', 'ngTagsInput'])
 
 })
 
-.controller('DashCtrl', ['$scope','$firebaseObject','$ionicPopup', function($scope, $firebaseObject, $ionicPopup) {
+.controller('DashCtrl', ['$scope','$firebaseObject','$ionicPopup', 'AdRef', function($scope, $firebaseObject, $ionicPopup, AdRef) {
 
   //initialize the global variables for this view
   $scope.number = 0;
   $scope.post = {};
-  $scope.match_options = [["Buy", "Sell"], ["Rent", "Lease"], ["Find", "Give"], ["Work", "Hire"], ["Do", "Task"], ["Join", "Recruit"], ["Meet", "Meet"]];
-  $scope.post.match_toggles = new Array($scope.match_options.length).fill(false);
+  $scope.match_modes = [["Buy", "Sell"], ["Rent", "Lease"], ["Find", "Give"], ["Work", "Hire"], ["Do", "Task"], ["Join", "Recruit"], ["Meet", "Meet"]];
   $scope.post.current_match = "Lease";
   $scope.user = {};
   $scope.post.tags = [];
@@ -82,26 +86,19 @@ angular.module('starter', ['ionic', 'firebase', 'ngTagsInput'])
 
 
   $scope.isCurrentMatch = function(cm) {
-    console.log("called isCurrentMatch\n"+cm);
+    // console.log("called isCurrentMatch\n"+cm);
     return $scope.post.current_match === cm;
   };
 
 
   $scope.setCurrentMatch = function(type) {
-    console.log("calling setCurrentMatch\n"+type);
+    // console.log("calling setCurrentMatch\n"+type);
     $scope.post.current_match = type;
   };
 
-  $scope.ToggleMatchOption = function(index) {
-    $scope.post.match_toggles[index] = !$scope.post.match_toggles[index];
-    for (var i = 0; i < $scope.post.match_toggles.length; i += 1) {
-      if (i != index) $scope.post.match_toggles[i] = false;
-    }
-    console.log($scope.post.match_toggles);
-  };
 
   var firebaseObj = new Firebase('https://gub.firebaseio.com/');
-  var fb = $firebaseObject(firebaseObj);
+  $scope.fb_ref = $firebaseObject(firebaseObj);
 
   $scope.showAlert = function() {
     $ionicPopup.alert({
@@ -113,20 +110,27 @@ angular.module('starter', ['ionic', 'firebase', 'ngTagsInput'])
 
   $scope.pushPost = function(){
     var match = "?";
+    $scope.fb_ref = AdRef;
     //for (var i = 0; i < $scope.post.match_toggles.length; i += 1) {
       //if ($scope.post.match_toggles[i])
-    fb.$push({
+    var post = {
+      user_id: $scope.authData.facebook.id,
       headline: $scope.post.headline,
       description: $scope.post.description,
       category: $scope.post.category,
-      start_date: $scope.post.start_date,
-      end_date: $scope.post.start_date,
-      match_option: $scope.post.current_match,
-      object: $scope.post.object,
-      tags: $scope.post.tags,
-      location: {latitude: $scope.user.latitude, longtitude: $scope.user.longitude},
-      description: $scope.user.desc
-      }).then(function(ref){
+      start_date: $scope.post.start_date || null,
+      end_date: $scope.post.start_date || null,
+      match_mode: $scope.post.current_match,
+      object: $scope.post.object || null,
+      tags: $scope.post.tags || null,
+      location: {
+        latitude: ($scope.user.latitude || null),
+        longtitude: ($scope.user.longtitude || null)
+      },
+      description: $scope.user.desc || null
+    }
+    console.log(post);
+    AdRef.$add(post).then(function(ref){
         $scope.user = {};
         $scope.showAlert();
       }, function(error) {
@@ -134,9 +138,7 @@ angular.module('starter', ['ionic', 'firebase', 'ngTagsInput'])
     });
   };
 
-
 }])
-
 
 .directive('map', function() {
     return {
