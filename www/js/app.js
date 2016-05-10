@@ -106,6 +106,13 @@ angular.module('starter', ['ionic', 'firebase', 'ngTagsInput'])
 
 
   $scope.pushPost = function(){
+    if (!($scope.post.headline && $scope.post.description && $scope.post.category)) {
+      $ionicPopup.alert({
+          title: 'Gub Error',
+          template: 'Please make sure you filled out the headline, the description and the category. '
+      });
+      return;
+    }
     var post = {
       user_id: $scope.authData.facebook.id,
       headline: $scope.post.headline,
