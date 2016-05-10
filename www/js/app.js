@@ -65,7 +65,7 @@ angular.module('starter', ['ionic', 'firebase', 'ngTagsInput'])
 
 })
 
-.controller('DashCtrl', ['$scope','$firebaseObject','$ionicPopup', 'AdRef', function($scope, $firebaseObject, $ionicPopup, AdRef) {
+.controller('DashCtrl', function($scope, $firebaseObject, $ionicPopup, AdRef) {
 
   //initialize the global variables for this view
   $scope.number = 0;
@@ -97,9 +97,6 @@ angular.module('starter', ['ionic', 'firebase', 'ngTagsInput'])
   };
 
 
-  var firebaseObj = new Firebase('https://gub.firebaseio.com/');
-  $scope.fb_ref = $firebaseObject(firebaseObj);
-
   $scope.showAlert = function() {
     $ionicPopup.alert({
         title: 'Gub',
@@ -109,10 +106,6 @@ angular.module('starter', ['ionic', 'firebase', 'ngTagsInput'])
 
 
   $scope.pushPost = function(){
-    var match = "?";
-    $scope.fb_ref = AdRef;
-    //for (var i = 0; i < $scope.post.match_toggles.length; i += 1) {
-      //if ($scope.post.match_toggles[i])
     var post = {
       user_id: $scope.authData.facebook.id,
       headline: $scope.post.headline,
@@ -138,7 +131,7 @@ angular.module('starter', ['ionic', 'firebase', 'ngTagsInput'])
     });
   };
 
-}])
+})
 
 .directive('map', function() {
     return {
