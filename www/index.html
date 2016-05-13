@@ -71,18 +71,6 @@
                 <span class="input-label">Headline</span>
                 <input type="text" ng-model="post.headline" placeholder="Headline">
               </label>
-              <label class="item item-input item-stacked-label">
-                <span class="input-label">Description</span>
-                <input type="text" ng-model="post.description" placeholder="Description">
-              </label>
-              <label class="item item-input item-select">
-                <div class="input-label"> Category</div>
-                <select ng-model="post.category">
-                  <option>Blue</option>
-                  <option selected>Yellow</option>
-                  <option>Red</option>
-                </select>
-              </label>
               <!-- We should add Media somewhere here -->
               <label class="item item-input">
                 <span class="input-label">Start</span>
@@ -95,16 +83,21 @@
               <!-- this part is essentially broken; looking for a way to walk around -->
               <label class="item">
                 Match Mode
-
               <div ng-repeat="option in match_modes">
                 <div class="button-bar">
                   <button class="button" on-tap="setCurrentMatch(option[0])" ng-class="{&apos;button-positive&apos;: isCurrentMatch(option[0]) }">{{option[0]}}</button>
                   <button class="button" on-tap="setCurrentMatch(option[1])" ng-class="{&apos;button-positive&apos;: isCurrentMatch(option[1]) }">{{option[1]}}</button>
                 </div>
-
-
-
               </div>
+            </label>
+            <label class="item item-input item-select">
+              <div class="input-label"> Category</div>
+              <select ng-model="post.category" ng-options="c for c in match_categories[post.current_match]">
+              </select>
+            </label>
+            <label class="item item-input item-stacked-label">
+              <span class="input-label">Description</span>
+              <input type="text" ng-model="post.description" placeholder="Description">
             </label>
             <label class="item item-input item-stacked-label">
               <span class="input-label">Object</span>
@@ -125,8 +118,10 @@
                 <button class="button button-full button-positive" ng-click="pushPost()">Post It</button>
               </div>
             </div>
-
           </div>
+
+          <button class="button button-full button-positive" ng-click="findMatch()">Find Match</button>
+          <div ng-repeat="x in gotmatch">{{x}}</div>
         </div>
       </div>
 
