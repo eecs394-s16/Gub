@@ -28,9 +28,9 @@ angular.module('starter', ['ionic', 'firebase', 'ngTagsInput'])
   return $firebaseAuth(usersRef);
 })
 
-.factory("AdRef", function($firebaseArray) {
-  var itemsRef = new Firebase("https://gub.firebaseio.com/ads");
-  return $firebaseArray(itemsRef);
+.factory("FBRef", function($firebaseArray) {
+  var itemsRef = new Firebase("https://gub.firebaseio.com");
+  return itemsRef;
 })
 
 .controller('LoginCtrl', function($scope, Auth) {
@@ -65,15 +65,31 @@ angular.module('starter', ['ionic', 'firebase', 'ngTagsInput'])
 
 })
 
-.controller('DashCtrl', function($scope, $firebaseObject, $ionicPopup, AdRef) {
+.controller('DashCtrl', function($scope, $firebaseArray, $ionicPopup, FBRef) {
 
   //initialize the global variables for this view
   $scope.number = 0;
   $scope.post = {};
+  // hardcoding the options of every match mode
   $scope.match_modes = [["Buy", "Sell"], ["Rent", "Lease"], ["Find", "Give"], ["Work", "Hire"], ["Do", "Task"], ["Join", "Recruit"], ["Meet", "Meet"]];
+  $scope.match_categories = {
+    'Buy': ["Art", "Collectibles", "Electronics", "Fashion", "Entertainment", "Books", "Sporting Goods", "Home and Garden", "Toys and Hobbies", "Deals and Gifts", "Tickets"],
+    'Sell' : ["Art", "Collectibles", "Electronics", "Fashion", "Entertainment", "Books", "Sporting Goods", "Home and Garden", "Toys and Hobbies", "Deals and Gifts", "Tickets"],
+    'Rent' : ["Space","House","Apartment","Condo", "Studio","Vehicle","Electronics"],
+    'Lease' : ["Space","House","Apartment","Condo", "Studio","Vehicle","Electronics"],
+    'Find' : ["Art","Collectibles","Electronics","Furniture","Fashion","Entertainment","Books","Sporting Goods","Home and Garden","Toys and Hobbies","Deals and Gifts","Tickets"],
+    'Give' : ["Art","Collectibles","Electronics","Furniture","Fashion","Entertainment","Books","Sporting Goods","Home and Garden","Toys and Hobbies","Deals and Gifts","Tickets"],
+    'Work' : ["Accountant", "Mechanic", "Server", "Writer", "Designer", "Consultant", "Teacher", "salesperson", "Engineer", "Developer", "Researcher", "Laborer"],
+    'Hire' : ["Accountant", "Mechanic", "Server", "Writer", "Designer", "Consultant", "Teacher", "salesperson", "Engineer", "Developer", "Researcher", "Laborer"],
+    'Do': ["Cleaning","Cooking","painting","yardwork","elder care","babysitting","driving","shopping"],
+    'Task': ["Cleaning","Cooking","painting","yardwork","elder care","babysitting","driving","shopping"],
+    'Join' : ["Band","Club","Study Group","Volunteer group","Campaign"],
+    'Recruit' : ["Band","Club","Study Group","Volunteer group","Campaign"],
+  };
   $scope.post.current_match = "Lease";
   $scope.user = {};
   $scope.post.tags = [];
+  $scope.gotmatch = "no match yet";
 
   getData();
 
@@ -116,7 +132,7 @@ angular.module('starter', ['ionic', 'firebase', 'ngTagsInput'])
     var post = {
       user_id: $scope.authData.facebook.id,
       headline: $scope.post.headline,
-      description: $scope.post.description,
+      description: $scope.post.description || null,
       category: $scope.post.category,
       start_date: $scope.post.start_date || null,
       end_date: $scope.post.start_date || null,
@@ -129,13 +145,48 @@ angular.module('starter', ['ionic', 'firebase', 'ngTagsInput'])
       },
       description: $scope.user.desc || null
     }
-    console.log(post);
-    AdRef.$add(post).then(function(ref){
-        $scope.user = {};
+    var ad_id = "";
+    // generate the ref in which we should store the ad
+    var tl_ref = FBRef.child("taglibrary");
+    tl_ref = tl_ref.child(post.match_mode);
+
+    // add the post on ads
+    var ads_ref = FBRef.child("ads");
+    var fbarray = $firebaseArray(ads_ref);
+    fbarray.$add(post).then(function(the_ref){
+        ad_id = the_ref.key();
+        console.log(ad_id);
+        console.log(post);
+        // push the ad label to TagLib
+        for (t in post.tags) {
+          console.log(t);
+          tl_ref = tl_ref.child(post.tags[t].text);
+          tl_ref.child(ad_id).set({
+            tags: $scope.post.tags || null,
+            location: {
+              latitude: ($scope.user.latitude || null),
+              longtitude: ($scope.user.longtitude || null)
+            },
+          });
+        }
         $scope.showAlert();
       }, function(error) {
         console.log("Error:", error);
     });
+
+    // find a match of this post
+    var target_match_options = "";
+    for (m in match_modes) {
+      if (post.match_mode == m[0])  target_match_options = m[1];
+      if (post.match_mode == m[1])  target_match_options = m[0];
+    }
+    if (target_match_options) {
+      // do the search in the firebase
+      
+
+    }
+
+    
   };
 
 })
