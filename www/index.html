@@ -64,8 +64,6 @@
             <!-- Create an Ad -->
             <h2>Write a Post</h2>
 
-            {{authData.facebook.id}}
-
             <div class="list">
               <label class="item item-input item-stacked-label">
                 <span class="input-label">Headline</span>
@@ -94,29 +92,21 @@
               </label>
               <!-- this part is essentially broken; looking for a way to walk around -->
               <label class="item">
-                {{post.current_match}}
+                Match Mode
 
-
-
-                <!-- <div ng-repeat="option in match_modes">
-                {{option[0]}} -->
-
+              <div ng-repeat="option in match_modes">
                 <div class="button-bar">
-                  <button class="button" ng-click="setCurrentMatch('Buy')"
-                  ng-class="{'button-positive': isCurrentMatch('Buy') }"
-                  >Buy</button>
-                  <button class="button" ng-click="setCurrentMatch('Sell')"
-                  ng-class="{'button-positive': isCurrentMatch('Sell') }"
-                  >Sell</button>
+                  <button class="button" on-tap="setCurrentMatch(option[0])"
+                  ng-class="{'button-positive': isCurrentMatch(option[0]) }"
+                  >{{option[0]}}</button>
+                  <button class="button" on-tap="setCurrentMatch(option[1])"
+                  ng-class="{'button-positive': isCurrentMatch(option[1]) }"
+                  >{{option[1]}}</button>
                 </div>
 
-                <!-- {{option[0]}}
-                <label class="toggle">
-                <input type="checkbox" ng-value="post.match_toggles[$index]" ng-click="ToggleMatchOption($index)">
-                <div class="track"> <div class="handle"></div></div>
-              </label>
-              {{option[1]}} -->
-              <!-- </div> -->
+
+
+              </div>
             </label>
             <label class="item item-input item-stacked-label">
               <span class="input-label">Object</span>
