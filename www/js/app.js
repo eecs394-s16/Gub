@@ -89,7 +89,7 @@ angular.module('starter', ['ionic', 'firebase', 'ngTagsInput'])
   $scope.post.current_match = "Lease";
   $scope.user = {};
   $scope.post.tags = [];
-  $scope.gotmatch = "no match yet";
+  $scope.gotmatch = ["no match yet"];
 
   getData();
 
@@ -174,20 +174,46 @@ angular.module('starter', ['ionic', 'firebase', 'ngTagsInput'])
         console.log("Error:", error);
     });
 
+  };
+
+  $scope.findMatch = function() {
     // find a match of this post
     var target_match_options = "";
-    for (m in match_modes) {
-      if (post.match_mode == m[0])  target_match_options = m[1];
-      if (post.match_mode == m[1])  target_match_options = m[0];
+    for (i in $scope.match_modes) {
+      m = $scope.match_modes[i];
+      if ("Rent" == m[0])  target_match_options = m[1];
+      if ("Rent" == m[1])  target_match_options = m[0];
     }
+    console.log("Looking for match option: ", target_match_options);
     if (target_match_options) {
       // do the search in the firebase
-      
+      ref = FBRef.child("taglibrary");
+      ref = ref.child(target_match_options);
+      ref = ref.child("space");
+      var valid_tags = {};
+      ref.on("value", function(snapshot) {
+        valid_tags = snapshot.val();
+        console.log(valid_tags);
+      }, function(errorObject) {
+        console.log("Error:", errorObject);
+      });
 
+      ref = FBRef.child("ads");
+      for (key in valid_tags) {
+        ref = ref.child(key);
+        ref.on("value", function(snapshot) {
+          $scope.gotmatch.push(snapshot.val());
+          console.log(valid_tags);
+        }, function(errorObject) {
+          console.log("Error:", errorObject);
+        });
+      }
     }
 
-    
-  };
+
+
+  }
+
 
 })
 
