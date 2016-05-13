@@ -181,15 +181,15 @@ angular.module('starter', ['ionic', 'firebase', 'ngTagsInput'])
     var target_match_options = "";
     for (i in $scope.match_modes) {
       m = $scope.match_modes[i];
-      if ("Rent" == m[0])  target_match_options = m[1];
-      if ("Rent" == m[1])  target_match_options = m[0];
+      if ($scope.post.current_match == m[0])  target_match_options = m[1];
+      if ($scope.post.current_match == m[1])  target_match_options = m[0];
     }
     console.log("Looking for match option: ", target_match_options);
     if (target_match_options) {
       // do the search in the firebase
       ref = FBRef.child("taglibrary");
       ref = ref.child(target_match_options);
-      ref = ref.child("space");
+      ref = ref.child($scope.post.tags[0].text);
       var valid_tags = {};
       ref.on("value", function(snapshot) {
         valid_tags = snapshot.val();
