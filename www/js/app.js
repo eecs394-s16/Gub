@@ -154,8 +154,8 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
     }
     var ad_id = "";
     // generate the ref in which we should store the ad
-    var tl_ref = FBRef.child("taglibrary");
-    tl_ref = tl_ref.child(post.match_mode);
+    var mm_ref = FBRef.child("taglibrary");
+    mm_ref = mm_ref.child(post.match_mode);
 
     // add the post on ads
     var ads_ref = FBRef.child("ads");
@@ -167,7 +167,7 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
         // push the ad label to TagLib
         for (t in post.tags) {
           console.log(t);
-          tl_ref = tl_ref.child(post.tags[t].text);
+          var tl_ref = mm_ref.child(post.tags[t].text);
           tl_ref.child(ad_id).set({
             tags: $scope.post.tags || null,
             location: {
@@ -180,37 +180,50 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
       }, function(error) {
         console.log("Error:", error);
     });
-
+    return post;
   };
 
   $scope.findMatch = function() {
+
+    var post = $scope.post;
+    console.log("Looking for matches for post: ", post);
     // find a match of this post
     var target_match_options = "";
     for (i in $scope.match_modes) {
       m = $scope.match_modes[i];
-      if ($scope.post.current_match == m[0])  target_match_options = m[1];
-      if ($scope.post.current_match == m[1])  target_match_options = m[0];
+      if (post.current_match == m[0])  target_match_options = m[1];
+      if (post.current_match == m[1])  target_match_options = m[0];
     }
-    console.log("Looking for match option: ", target_match_options);
+    console.log("Looking into match option: ", target_match_options);
     if (target_match_options) {
       // do the search in the firebase
-      ref = FBRef.child("taglibrary");
-      ref = ref.child(target_match_options);
-      ref = ref.child($scope.post.tags[0].text);
-      var valid_tags = {};
-      ref.on("value", function(snapshot) {
-        valid_tags = snapshot.val();
-        console.log(valid_tags);
-      }, function(errorObject) {
-        console.log("Error:", errorObject);
-      });
-
-      ref = FBRef.child("ads");
-      for (key in valid_tags) {
-        ref = ref.child(key);
+      // right now just match all the ads that have one tag in common
+      var taglib_ref = FBRef.child("taglibrary");
+      taglib_ref = taglib_ref.child(target_match_options);
+      var valid_ad_ids = [];
+      for (i in post.tags) {
+        var ref = taglib_ref.child(post.tags[i].text);
         ref.on("value", function(snapshot) {
-          $scope.gotmatch.push(snapshot.val());
-          console.log(valid_tags);
+          snapshots = snapshot.val();
+          // put the id of every valid ad into valid_ad_ids
+          for (key in snapshots) {
+            // can do any type check here before pushing
+            valid_ad_ids.push(key);
+          }
+          console.log(valid_ad_ids);
+        }, function(errorObject) {
+          console.log("Error:", errorObject);
+        });
+      }
+      // for every ad id, retrieve the actual ad
+      adsref = FBRef.child("ads");
+      for (i in valid_ad_ids) {
+        var key = valid_ad_ids[i];
+        ref = adsref.child(key);
+        ref.on("value", function(snapshot) {
+          var ad = snapshot.val();
+          $scope.gotmatch.push(ad);
+          console.log("Got matched ad: ", ad, " with key ", key);
         }, function(errorObject) {
           console.log("Error:", errorObject);
         });
