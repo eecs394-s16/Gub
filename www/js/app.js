@@ -7,6 +7,8 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
+
+    // PUSH NOTIFICATION THINGS
     var push = new Ionic.Push({
       "debug": true
     });
@@ -14,6 +16,8 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
       console.log("Device token:",token.token);
       push.saveToken(token);
     });
+
+    // OTHER CORDOVA THINGS
     if(window.cordova && window.cordova.plugins.Keyboard) {
       // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
       // for form inputs)
@@ -28,6 +32,7 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
       StatusBar.styleDefault();
     }
   });
+
 })
 
 .factory('Auth', function($firebaseAuth) {
