@@ -92,7 +92,7 @@
 
             <label class="item item-input item-select">
               <div class="input-label">Category</div>
-              <select ng-model="post.category" ng-options="c for c in match_categories[post.current_match]">
+              <select ng-model="post.category" ng-options="c for c in match_categories[post.match_mode]">
               </select>
             </label>
 
@@ -126,7 +126,7 @@
           <div class="card">
             <button class="item button button-full button-positive" ng-click="findMatch()">Find Match</button>
 
-            <div ng-repeat="mpost in gotmatch">
+            <div ng-repeat="mpost in matched_ads">
               <div class="list card">
 
                 <div class="item item-avatar">
