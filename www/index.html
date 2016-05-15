@@ -32,103 +32,108 @@
 
   <!-- your app's js -->
   <script src="js/app.js"></script>
-
 </head>
+
 <body ng-app="starter">
   <ion-pane>
-
+    <!-- APP HEADER -->
     <ion-header-bar class="bar-stable">
-      <h1 class="title">Welcome to Gub!</h1>
+      <h1 class="title">Gub</h1>
     </ion-header-bar>
-    <ion-content>
 
-      <!-- LOGIN -->
+    <!-- APP BODY -->
+    <ion-content>
       <div ng-controller="LoginCtrl">
 
+        <!-- LOGIN -->
         <div ng-hide="authData" class="card">
-          <button class="item" ng-click="login()">
+          <button class="item button-full" ng-click="login()">
             Login with Facebook
           </button>
         </div>
 
+        <!-- LOGOUT -->
         <div ng-show="authData" class="card">
           <div class="item item-text-wrap">
             Hello {{authData.facebook.displayName}}!
           </div>
-
-          <button class="item" ng-click="logout()">
-            Logout
-          </button>
-
+          <button class="item button-full" ng-click="logout()">Logout</button>
         </div>
 
-        <div ng-show="authData">
-          <div ng-controller="DashCtrl">
-            <!-- Create an Ad -->
-            <h2>Write a Post</h2>
+        <!-- AD CREATION DASHBOARD -->
+        <div ng-show="authData" ng-controller="DashCtrl">
+          <div class="card">
 
-            <div class="list">
-              <label class="item item-input item-stacked-label">
-                <span class="input-label">Headline</span>
-                <input type="text" ng-model="post.headline" placeholder="Headline">
-              </label>
-              <!-- We should add Media somewhere here -->
-              <label class="item item-input">
-                <span class="input-label">Start</span>
-                <input type="date" ng-model="post.start_date">
-              </label>
-              <label class="item item-input">
-                <span class="input-label">End</span>
-                <input type="date" ng-model="post.end_date">
-              </label>
-              <!-- this part is essentially broken; looking for a way to walk around -->
-              <label class="item">
-                Match Mode
-                <div ng-repeat="option in match_modes">
-                  <div class="button-bar">
-                    <button class="button" on-tap="setCurrentMatch(option[0])" ng-class="{&apos;button-positive&apos;: isCurrentMatch(option[0]) }">{{option[0]}}</button>
-                    <button class="button" on-tap="setCurrentMatch(option[1])" ng-class="{&apos;button-positive&apos;: isCurrentMatch(option[1]) }">{{option[1]}}</button>
-                  </div>
-                </div>
-              </label>
-              <label class="item item-input item-select">
-                <div class="input-label"> Category</div>
-                <select ng-model="post.category" ng-options="c for c in match_categories[post.current_match]">
-                </select>
-              </label>
-              <label class="item item-input item-stacked-label">
-                <span class="input-label">Description</span>
-                <input type="text" ng-model="post.description" placeholder="Description">
-              </label>
-              <label class="item item-input item-stacked-label">
-                <span class="input-label">Object</span>
-                <input type="text" ng-model="post.object" placeholder="Object">
-              </label>
-
-              <tags-input ng-model="post.tags"></tags-input>
-
-
-              <div>
-                <div id="map" lat="42.059157" lng="-87.673853" zoom="8" map="">
-                </div>
-
-                <div width="80%" class="list list-inset" style="margin-left:10%;margin-right:10%;">
-                  <label class="item item-input">
-                    <input type="text" ng-model="user.desc" placeholder="Set Your Location">
-                  </label>
-                  <button class="button button-full button-positive" ng-click="pushPost()">Post It</button>
-                </div>
-              </div>
+            <!-- AD CREATION CARD-->
+            <div class="item item-divider">
+              Create an Ad
             </div>
 
-            <button class="button button-full button-positive" ng-click="findMatch()">Find Match</button>
+            <label class="item item-input item-stacked-label">
+              <span class="input-label">Headline</span>
+              <input type="text" ng-model="post.headline" placeholder="Headline">
+            </label>
+
+            <!-- We should add Media somewhere here -->
+            <label class="item item-input">
+              <span class="input-label">Start</span>
+              <input type="date" ng-model="post.start_date">
+            </label>
+
+            <label class="item item-input">
+              <span class="input-label">End</span>
+              <input type="date" ng-model="post.end_date">
+            </label>
+
+            <!-- this part is essentially broken; looking for a way to walk around -->
+            <label class="item">
+              Match Mode
+              <div ng-repeat="option in match_modes">
+                <div class="button-bar">
+                  <button class="button" on-tap="setCurrentMatch(option[0])" ng-class="{&apos;button-positive&apos;: isCurrentMatch(option[0]) }">{{option[0]}}</button>
+                  <button class="button" on-tap="setCurrentMatch(option[1])" ng-class="{&apos;button-positive&apos;: isCurrentMatch(option[1]) }">{{option[1]}}</button>
+                </div>
+              </div>
+            </label>
+
+            <label class="item item-input item-select">
+              <div class="input-label">Category</div>
+              <select ng-model="post.category" ng-options="c for c in match_categories[post.current_match]">
+              </select>
+            </label>
+
+            <label class="item item-input item-stacked-label">
+              <span class="input-label">Description</span>
+              <input type="text" ng-model="post.description" placeholder="Description">
+            </label>
+
+            <label class="item item-input item-stacked-label">
+              <span class="input-label">Object</span>
+              <input type="text" ng-model="post.object" placeholder="Object">
+            </label>
+
+            <div class="item">
+              <tags-input ng-model="post.tags"></tags-input>
+            </div>
+
+            <div id="post-it" class="list list-inset">
+              <label class="item item-input">
+                <input type="text" ng-model="user.desc" placeholder="Set Your Location">
+              </label>
+              <button class="button button-full button-positive" ng-click="pushPost()">Post It</button>
+            </div>
+          </div>
+
+          <!-- FIND MATCH CARD -->
+          <div class="card">
+            <button class="item button button-full button-positive" ng-click="findMatch()">Find Match</button>
             <div ng-repeat="x in gotmatch">{{x}}</div>
           </div>
+          
         </div>
-
       </div>
-
-    </ion-content>
-  </ion-pane>
+    </div>
+  </ion-content>
+</ion-pane>
 </body>
 </html>
