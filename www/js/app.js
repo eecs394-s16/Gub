@@ -96,7 +96,7 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
   $scope.post.current_match = "Lease";
   $scope.user = {};
   $scope.post.tags = [];
-  $scope.gotmatch = ["no match yet"];
+  $scope.gotmatch = [];
 
   getData();
 
@@ -127,6 +127,26 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
     });
   };
 
+  $scope.GeneratePostToSubmit = function() {
+    var post = {
+      user_id: $scope.authData.facebook.id,
+      headline: $scope.post.headline,
+      description: $scope.post.description || null,
+      category: $scope.post.category,
+      start_date: ($scope.post.start_date ? $scope.post.start_date.toString() : null),
+      end_date: ($scope.post.end_date ? $scope.post.end_date.toString() : null),
+      match_mode: $scope.post.current_match,
+      object: $scope.post.object || null,
+      tags: $scope.post.tags || null,
+      location: {
+        latitude: ($scope.user.latitude || null),
+        longtitude: ($scope.user.longtitude || null)
+      },
+    };
+    console.log(post);
+    return post;
+  }
+
 
   $scope.pushPost = function(){
     if (!($scope.post.headline && $scope.post.description && $scope.post.category)) {
@@ -136,22 +156,7 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
       });
       return;
     }
-    var post = {
-      user_id: $scope.authData.facebook.id,
-      headline: $scope.post.headline,
-      description: $scope.post.description || null,
-      category: $scope.post.category,
-      start_date: $scope.post.start_date || null,
-      end_date: $scope.post.start_date || null,
-      match_mode: $scope.post.current_match,
-      object: $scope.post.object || null,
-      tags: $scope.post.tags || null,
-      location: {
-        latitude: ($scope.user.latitude || null),
-        longtitude: ($scope.user.longtitude || null)
-      },
-      description: $scope.user.desc || null
-    }
+    var post = $scope.GeneratePostToSubmit();
     var ad_id = "";
     // generate the ref in which we should store the ad
     var mm_ref = FBRef.child("taglibrary");
@@ -163,7 +168,6 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
     fbarray.$add(post).then(function(the_ref){
         ad_id = the_ref.key();
         console.log(ad_id);
-        console.log(post);
         // push the ad label to TagLib
         for (t in post.tags) {
           console.log(t);
@@ -186,6 +190,8 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
   $scope.findMatch = function() {
 
     var post = $scope.post;
+    $scope.gotmatch = [];
+
     console.log("Looking for matches for post: ", post);
     // find a match of this post
     var target_match_options = "";
@@ -215,6 +221,11 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
           console.log("Error:", errorObject);
         });
       }
+      valid_ad_ids = valid_ad_ids.filter(function(elem, index, self) {
+        return index == self.indexOf(elem);
+      })
+
+
       // for every ad id, retrieve the actual ad
       adsref = FBRef.child("ads");
       for (i in valid_ad_ids) {

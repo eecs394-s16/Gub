@@ -74,15 +74,9 @@
               <input type="text" ng-model="post.headline" placeholder="Headline">
             </label>
 
-            <!-- We should add Media somewhere here -->
-            <label class="item item-input">
-              <span class="input-label">Start</span>
-              <input type="date" ng-model="post.start_date">
-            </label>
-
-            <label class="item item-input">
-              <span class="input-label">End</span>
-              <input type="date" ng-model="post.end_date">
+            <label class="item item-input item-stacked-label">
+              <span class="input-label">Description</span>
+              <input type="text" ng-model="post.description" placeholder="Description">
             </label>
 
             <!-- this part is essentially broken; looking for a way to walk around -->
@@ -102,24 +96,28 @@
               </select>
             </label>
 
-            <label class="item item-input item-stacked-label">
-              <span class="input-label">Description</span>
-              <input type="text" ng-model="post.description" placeholder="Description">
-            </label>
+            <div class="item">
+              <tags-input ng-model="post.tags"></tags-input>
+            </div>
 
             <label class="item item-input item-stacked-label">
               <span class="input-label">Object</span>
               <input type="text" ng-model="post.object" placeholder="Object">
             </label>
 
-            <div class="item">
-              <tags-input ng-model="post.tags"></tags-input>
-            </div>
+            <!-- We should add Media somewhere here -->
+            <label class="item item-input">
+              <span class="input-label">Start</span>
+              <input type="date" ng-model="post.start_date">
+            </label>
+
+            <label class="item item-input">
+              <span class="input-label">End</span>
+              <input type="date" ng-model="post.end_date">
+            </label>
 
             <div id="post-it" class="list list-inset">
-              <label class="item item-input">
-                <input type="text" ng-model="user.desc" placeholder="Set Your Location">
-              </label>
+              {{post.description}}
               <button class="button button-full button-positive" ng-click="pushPost()">Post It</button>
             </div>
           </div>
@@ -134,19 +132,15 @@
                 <div class="item item-avatar">
                   <h2>{{mpost.headline}}</h2>
                   <p>{{mpost.match_mode}} - {{mpost.category}}</p>
+                  <p>posted by {{mpost.user_id}}</p>
                 </div>
 
                 <div class="item item-body">
-                  <p>
-                    This is a "Facebook" styled Card. The header is created from a Thumbnail List item,
-                    the content is from a card-body consisting of an image and paragraph text. The footer
-                    consists of tabs, icons aligned left, within the card-footer.
-                  </p>
-                  <p>
-                    <div ng-repeat="t in mpost.tags">
-                      <a href="#" class="subdued">{{t.text}}</a>
-                    </div>
-                  </p>
+                  <div ng-show="mpost.end_date"><h4>Match ends at {{mpost.end_date}}</h4></div>
+                  <p> {{mpost.description}}</p>
+                  <div ng-repeat="t in mpost.tags">
+                    <a href="#" class="subdued">#{{t.text}}</a>
+                  </div>
                 </div>
 
               </div>
