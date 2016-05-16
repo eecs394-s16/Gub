@@ -16,3 +16,5 @@ data = {
     }
 }
 
+r = requests.post('https://api.ionic.io/push/notifications', headers=headers, data=json.dumps(data))
+print r
