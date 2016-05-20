@@ -5,7 +5,7 @@
 // the 2nd parameter is an array of 'requires'
 angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInput'])
 
-.run(function($ionicPlatform) {
+.run(function($rootScope, $ionicPlatform) {
   $ionicPlatform.ready(function() {
 
     // PUSH NOTIFICATION THINGS
@@ -15,6 +15,7 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
     push.register(function(token) {
       console.log("Device token:",token.token);
       push.saveToken(token);
+      $rootScope.deviceToken = token.token;
     });
 
     // OTHER CORDOVA THINGS
@@ -45,7 +46,8 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
   return itemsRef;
 })
 
-.controller('LoginCtrl', function($scope, Auth) {
+.controller('LoginCtrl', function($rootScope, $scope, $ionicPlatform, Auth, FBRef) {
+
   $scope.login = function() {
     Auth.$authWithOAuthRedirect("facebook").then(function(authData) {
       // User successfully logged in
@@ -71,6 +73,15 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
       console.log("Not logged in yet");
     } else {
       console.log("Logged in as", authData.uid);
+
+      var users_ref = FBRef.child("users");
+      var me = users_ref.child(authData.facebook.id);
+
+      $ionicPlatform.ready(function() {
+        me.child("deviceToken").set($rootScope.deviceToken);
+        console.log("Successfully pushed device token " + $rootScope.deviceToken + " for user " + authData.uid + " to Firebase");
+      });
+      
     }
     $scope.authData = authData;
   });
