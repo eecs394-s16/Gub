@@ -18,7 +18,7 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
       $rootScope.deviceToken = token.token;
     });
 
-    
+
     // Get a reference to the plugin.
     var bgGeo = window.BackgroundGeolocation;
 
@@ -28,8 +28,8 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
         var coords = location.coords;
         var lat    = coords.latitude;
         var lng    = coords.longitude;
-        $scope.user.latitude = lat;
-        $scope.user.longitude = lng;
+        $rootScope.latitude = lat;
+        $rootScope.longitude = lng;
         console.log('- Location: ', JSON.stringify(location));
 
         // Must signal completion of your callbackFn.
@@ -55,9 +55,9 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
         // desiredAccuracy: 0,
         // distanceFilter: 10,
         // stationaryRadius: 50,
-        // locationUpdateInterval: 1000,
+        locationUpdateInterval: 1000,
         // fastestLocationUpdateInterval: 5000,
-
+        //
         // Activity Recognition config
         // activityType: 'AutomotiveNavigation',
         // activityRecognitionInterval: 5000,
@@ -77,7 +77,7 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
 
     // The plugin is typically toggled with some button on your UI.
 
-  
+
 
     // OTHER CORDOVA THINGS
     if(window.cordova && window.cordova.plugins.Keyboard) {
@@ -142,7 +142,7 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
         me.child("deviceToken").set($rootScope.deviceToken);
         console.log("Successfully pushed device token " + $rootScope.deviceToken + " for user " + authData.uid + " to Firebase");
       });
-      
+
     }
     $scope.authData = authData;
   });
