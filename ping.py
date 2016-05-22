@@ -12,4 +12,4 @@ data = {
 }
 
 r = requests.post('https://gcm-http.googleapis.com/gcm/send', headers=headers, data=json.dumps(data))
-print r
+print r.content
