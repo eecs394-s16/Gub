@@ -60,6 +60,11 @@
           <button class="item button-full" ng-click="logout()">Logout</button>
         </div>
 
+        <div ng-controller="serverCtrl" id="server_run" class="list list-inset">
+          <button class="button" ng-click="updateAllMatches()"> Update match table</button>
+          <button class="button" ng-click="clearAllMatches()"> Clear match table</button>
+        </div>
+
         <!-- AD CREATION DASHBOARD -->
         <div ng-show="authData" ng-controller="DashCtrl">
           <div class="card">
@@ -117,7 +122,6 @@
             </label>
 
             <div id="post-it" class="list list-inset">
-              {{post.description}}
               <button class="button button-full button-positive" ng-click="pushPost()">Post It</button>
             </div>
           </div>

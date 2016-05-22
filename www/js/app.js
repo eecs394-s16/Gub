@@ -5,7 +5,7 @@
 // the 2nd parameter is an array of 'requires'
 angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInput'])
 
-.run(function($rootScope, $ionicPlatform) {
+.run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
 
     // PUSH NOTIFICATION THINGS
@@ -15,7 +15,6 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
     push.register(function(token) {
       console.log("Device token:",token.token);
       push.saveToken(token);
-      $rootScope.deviceToken = token.token;
     });
 
     // OTHER CORDOVA THINGS
@@ -46,8 +45,7 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
   return itemsRef;
 })
 
-.controller('LoginCtrl', function($rootScope, $scope, $ionicPlatform, Auth, FBRef) {
-
+.controller('LoginCtrl', function($scope, Auth) {
   $scope.login = function() {
     Auth.$authWithOAuthRedirect("facebook").then(function(authData) {
       // User successfully logged in
@@ -73,15 +71,6 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
       console.log("Not logged in yet");
     } else {
       console.log("Logged in as", authData.uid);
-
-      var users_ref = FBRef.child("users");
-      var me = users_ref.child(authData.facebook.id);
-
-      $ionicPlatform.ready(function() {
-        me.child("deviceToken").set($rootScope.deviceToken);
-        console.log("Successfully pushed device token " + $rootScope.deviceToken + " for user " + authData.uid + " to Firebase");
-      });
-      
     }
     $scope.authData = authData;
   });
@@ -91,7 +80,6 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
 .controller('DashCtrl', function($scope, $firebaseArray, $ionicPopup, FBRef) {
 
   //initialize the global variables for this view
-  $scope.number = 0;
   $scope.post = {};
 
   // hardcoding the options of every match mode
@@ -114,15 +102,6 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
   $scope.user = {};
   $scope.post.tags = [];
   $scope.matched_ads = [];
-
-  getData();
-
-  function getData() {
-    var ref = new Firebase('https://gub.firebaseio.com/');
-    ref.on("value", function(snapshot) {
-      $scope.number = snapshot.val();
-    }, function (errorObject) {});
-  }
 
 
   $scope.isCurrentMatch = function(cm) {
@@ -208,7 +187,8 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
         user_ref.child(ad_id).set({
           match_mode : ad_entry.match_mode,
           category : ad_entry.category,
-          tags : ad_entry.tags
+          tags : ad_entry.tags,
+          location : ad_entry.location
         });
 
         $scope.showAlert();
@@ -218,11 +198,38 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
     return ad_entry;
   };
 
-  // given an ad (or any json object) with match_options and tags,
-  // return a list of ads that can be matched
-  $scope.findMatchForPost = function(post) {
+  $scope.findMatch = function() {
 
-    console.log("Looking for matches for post: ", post);
+    $scope.matched_ads = [];
+    var user_ref = FBRef.child("matches").child($scope.authData.facebook.id);
+    user_ref.on("value", function(snapshot) {
+      var matched_ads = snapshot.val();
+      for (ad_id in matched_ads) {
+        //$scope.matched_ads.push(findAd(ad_id));
+        var ref = FBRef.child("ads").child(ad_id);
+        ref.on("value", function(snapshot) {
+          var ad_object = (snapshot ? snapshot.val() : null);
+          $scope.matched_ads.push(ad_object);
+        }, function(errorObject) {
+          console.log("Error when retrieving the ad:", errorObject);
+        });
+      }
+    }, function(errorObject) {
+      console.log("Error when finding the match:", errorObject);
+    });
+  }
+
+
+})
+
+.controller('serverCtrl', function($scope, FBRef) {
+
+  $scope.match_modes = [["Buy", "Sell"], ["Rent", "Lease"], ["Find", "Give"], ["Work", "Hire"], ["Do", "Task"], ["Join", "Recruit"], ["Meet", "Meet"]];
+
+  // given an ad (or any json object) with match_mode, location and tags,
+  // return a list of ads that can be matched
+  $scope.findMatchForPost = function(user_id, post_id, post) {
+
     var matched_ads = [];
 
     // find a match of this post
@@ -238,7 +245,6 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
       // right now just match all the ads that have one tag in common
       var taglib_ref = FBRef.child("taglibrary");
       taglib_ref = taglib_ref.child(target_match_options);
-      var valid_ad_ids = [];
       for (i in post.tags) {
         var ref = taglib_ref.child(post.tags[i].text);
         ref.on("value", function(snapshot) {
@@ -246,53 +252,87 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
           // put the id of every valid ad into valid_ad_ids
           for (key in snapshots) {
             // can do any type check here before pushing
-            valid_ad_ids.push(key);
+            if (snapshots[key].user_id != user_id) {
+              if (nearInLocation(snapshots[key].location, post["location"]))
+                $scope.updateThisMatch(user_id, post_id, key);
+            }
           }
-          console.log(valid_ad_ids);
-        }, function(errorObject) {
+        },
+        function(errorObject) {
           console.log("Error when getting ad ids:", errorObject);
         });
       }
-      valid_ad_ids = valid_ad_ids.filter(function(elem, index, self) {
-        return index == self.indexOf(elem);
-      })
-
-
-      // for every ad id, retrieve the actual ad
-      adsref = FBRef.child("ads");
-      for (i in valid_ad_ids) {
-        var key = valid_ad_ids[i];
-        ref = adsref.child(key);
-        ref.on("value", function(snapshot) {
-          var ad = snapshot.val();
-          matched_ads.push(ad);
-        }, function(errorObject) {
-          console.log("Error when retrieving the ad:", errorObject);
-        });
-      }
     }
-    return matched_ads;
   };
 
   // a wrapper we can use to grab matched ads for many ads we posted
   //    and update the $scope.matched_ads accordingly
-  $scope.findMatch = function() {
+  $scope.findMatchForUser = function(user_id) {
     //$scope.matched_ads = findMatchForPost($scope.post);
 
+    var matched_ads = [];
     // look into the database and scan every ad that this user have posted
-    console.log($scope.authData.facebook.id);
-    var user_ref = FBRef.child("users").child($scope.authData.facebook.id).child("postedAds");
+    var user_ref = FBRef.child("users").child(user_id).child("postedAds");
     user_ref.on("value", function(snapshot) {
       var all_ads = snapshot.val();
-      for (k in all_ads) {
-        var matched_ads = $scope.findMatchForPost(all_ads[k]);
-        console.log(matched_ads);
-        $scope.matched_ads = $scope.matched_ads.concat(matched_ads);
+      for (ad_id1 in all_ads) {
+        var matched_ads = $scope.findMatchForPost(user_id, ad_id1, all_ads[ad_id1]);
+        // update the match table with ad_id1 and every ad in matched_ads
+        for (k in matched_ads) {
+          var ad_id2 = matched_ads[k];
+          // $scope.updateThisMatch(user_id, ad_id1, ad_id2);
+        }
       }
     }, function(errorObject) {
       console.log("Error when getting ad ids:", errorObject);
     });
   };
+
+  // given the args, put ad_id2: {matched_to: ad_id1} under matches/user_id1
+  // user_id1 posted the ad_id1, and ad_id2 is the ad that matched to ad_id1
+  $scope.updateThisMatch = function(user_id1, ad_id1, ad_id2) {
+    var ref = FBRef.child("matches").child(user_id1);
+    ref.child(ad_id2).set({
+      matched_to : ad_id1
+    });
+
+  }
+
+  $scope.updateAllMatches = function() {
+    //$scope.clearAllMatches();
+
+    var user_ids = [];
+    var ref = FBRef.child("users");
+    ref.on("value", function(snapshot) {
+      snapshots = snapshot.val();
+      for (key in snapshots) {
+        $scope.findMatchForUser(key);
+      }
+    }, function(errorObject) {
+      console.log("Error when getting user ids:", errorObject);
+    });
+    console.log("Matching completed. ");
+  }
+
+  // for debug purposes, write this to clear every matches that have been done
+  $scope.clearAllMatches = function() {
+    console.log("Warning: GOING TO CLEAR ALL THE MATCHES. ")
+    FBRef.child("matches").set(null);
+  }
+
+  // right now we match everything as long as they are not too far away
+  var nearInLocation = function(loc1, loc2) {
+    if (loc1 != null && loc2 != null) {
+      var dist = Math.pow((loc1.longitude - loc2.longitude), 2);
+      dist += Math.pow((loc1.latitude - loc2.latitude), 2);
+      dist = Math.sqrt(dist);
+      if (dist > 100) {   // some random distance
+        return false
+      }
+    }
+    return true
+  }
+
 
 
 })
