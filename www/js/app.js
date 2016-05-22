@@ -210,6 +210,7 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
         var ref = FBRef.child("ads").child(ad_id);
         ref.on("value", function(snapshot) {
           var ad_object = (snapshot ? snapshot.val() : null);
+          console.log("found a match: ", ad_object);
           $scope.matched_ads.push(ad_object);
         }, function(errorObject) {
           console.log("Error when retrieving the ad:", errorObject);
