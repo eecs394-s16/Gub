@@ -203,6 +203,7 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
     $scope.matched_ads = [];
     var user_ref = FBRef.child("matches").child($scope.authData.facebook.id);
     user_ref.on("value", function(snapshot) {
+      console.log("Looking for matches ...");
       var matched_ads = snapshot.val();
       for (ad_id in matched_ads) {
         //$scope.matched_ads.push(findAd(ad_id));
@@ -316,6 +317,7 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
 
   // for debug purposes, write this to clear every matches that have been done
   $scope.clearAllMatches = function() {
+    console.log(Firebase);
     console.log("Warning: GOING TO CLEAR ALL THE MATCHES. ")
     FBRef.child("matches").set(null);
   }
@@ -327,10 +329,10 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
       dist += Math.pow((loc1.latitude - loc2.latitude), 2);
       dist = Math.sqrt(dist);
       if (dist > 100) {   // some random distance
-        return false
+        return false;
       }
     }
-    return true
+    return true;
   }
 
 
