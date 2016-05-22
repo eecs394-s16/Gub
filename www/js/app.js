@@ -5,32 +5,12 @@
 // the 2nd parameter is an array of 'requires'
 angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInput', 'ngCordova'])
 
-.run(function($rootScope, $ionicPlatform, $cordovaPush) {
+.run(function($rootScope, $ionicPlatform) {
   $ionicPlatform.ready(function() {
-
-    // PUSH NOTIFICATION THINGS
-    var push = new Ionic.Push({
-      "debug": true
-    });
-    push.register(function(token) {
-      console.log("Device token:",token.token);
-      push.saveToken(token);
-      $rootScope.deviceToken = token.token;
-    });
-
-    var pushP = PushNotification.init({
-      android: {
-        senderID: "445992274665"
-      },
-      ios: {
-        alert: "true",
-        badge: true,
-        sound: "false"
-      },
-    });
-
-    // OTHER CORDOVA THINGS
-    if(window.cordova && window.cordova.plugins.Keyboard) {
+    /*
+     * ~Just Cordova things~
+     */
+    if (window.cordova && window.cordova.plugins.Keyboard) {
       // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
       // for form inputs)
       cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
@@ -40,7 +20,7 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
       // a much nicer keyboard experience.
       cordova.plugins.Keyboard.disableScroll(true);
     }
-    if(window.StatusBar) {
+    if (window.StatusBar) {
       StatusBar.styleDefault();
     }
   });
@@ -56,7 +36,7 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
   return itemsRef;
 })
 
-.controller('LoginCtrl', function($rootScope, $scope, $ionicPlatform, Auth, FBRef) {
+.controller('LoginCtrl', function($rootScope, $scope, $ionicPlatform, $cordovaPush, Auth, FBRef) {
 
   $scope.login = function() {
     Auth.$authWithOAuthRedirect("facebook").then(function(authData) {
@@ -78,20 +58,60 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
     Auth.$unauth();
   };
 
+  /*
+   * Register for Push Notifications
+   * Link the given Facebook UID (uid) with the Push Token
+   */
+  function pushRegister(uid) {
+
+    var androidConfig = {
+      senderID: "445992274665"
+    };
+
+    $cordovaPush.register(androidConfig)
+    .then(function(result) {
+      // SUCCESS
+      console.log("Push Notification Sucess: " + result);
+    }, function(err) {
+      // ERROR
+      console.log("Push Notification Error: " + err);
+    });
+
+    $rootScope.$on('$cordovaPush:notificationReceived', function(event, notification) {
+      switch(notification.event) {
+
+        case 'registered': //register confirmation
+        if (notification.regid.length > 0) {
+          FBRef.child("users").child(uid).child("deviceToken").set(notification.regid);
+          console.log("Facebook ID and push token associated");
+          console.log(notification.regid);
+        }
+        break;
+
+        case 'message': //actual push notification
+          console.log('message = ' + notification.message + ' msgCount = ' + notification.msgcnt);
+        break;
+
+        case 'error': //Error
+          alert('GCM error = ' + notification.msg);
+        break;
+
+        default:
+          alert('An unknown GCM event has occurred');
+        break;
+      }
+
+    });
+  }
+
   Auth.$onAuth(function(authData) {
     if (authData === null) {
       console.log("Not logged in yet");
     } else {
-      console.log("Logged in as", authData.uid);
-
-      var users_ref = FBRef.child("users");
-      var me = users_ref.child(authData.facebook.id);
-
+      console.log("Logged in with Facebook ID ", authData.facebook.id);
       $ionicPlatform.ready(function() {
-        me.child("deviceToken").set($rootScope.deviceToken);
-        console.log("Successfully pushed device token " + $rootScope.deviceToken + " for user " + authData.uid + " to Firebase");
+        pushRegister(authData.facebook.id);
       });
-
     }
     $scope.authData = authData;
   });
@@ -149,8 +169,8 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
 
   $scope.showAlert = function() {
     $ionicPopup.alert({
-        title: 'Gub',
-        template: 'Post submitted!!'
+      title: 'Gub',
+      template: 'Post submitted!!'
     });
   };
 
@@ -178,8 +198,8 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
   $scope.pushPost = function(){
     if (!($scope.post.headline && $scope.post.description && $scope.post.category)) {
       $ionicPopup.alert({
-          title: 'Gub Error',
-          template: 'Please make sure you filled out the headline, the description and the category. '
+        title: 'Gub Error',
+        template: 'Please make sure you filled out the headline, the description and the category. '
       });
       return;
     }
@@ -193,37 +213,37 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
     var ads_ref = FBRef.child("ads");
     var fbarray = $firebaseArray(ads_ref);
     fbarray.$add(ad_entry).then(function(the_ref){
-        ad_id = the_ref.key();
-        console.log(ad_id);
+      ad_id = the_ref.key();
+      console.log(ad_id);
 
-        // push the ad id to TagLib
-        for (t in ad_entry.tags) {
-          console.log(t);
-          var tl_ref = mm_ref.child(ad_entry.tags[t].text);
-          tl_ref.child(ad_id).set({
-            tags: ad_entry.tags || null,
-            location: {
-              latitude: (ad_entry.location.latitude || null),
-              longtitude: (ad_entry.location.longtitude || null)
-            },
-          });
-        }
-
-        // push the ad id to UserProfile, to keep track of all ads that he posted
-        // record the match_mode, category and tags here for later search
-        var user_ref = FBRef.child("users");
-        user_ref = user_ref.child($scope.authData.facebook.id);
-        user_ref.child("name").set($scope.authData.facebook.displayName);
-        user_ref = user_ref.child("postedAds");
-        user_ref.child(ad_id).set({
-          match_mode : ad_entry.match_mode,
-          category : ad_entry.category,
-          tags : ad_entry.tags
+      // push the ad id to TagLib
+      for (t in ad_entry.tags) {
+        console.log(t);
+        var tl_ref = mm_ref.child(ad_entry.tags[t].text);
+        tl_ref.child(ad_id).set({
+          tags: ad_entry.tags || null,
+          location: {
+            latitude: (ad_entry.location.latitude || null),
+            longtitude: (ad_entry.location.longtitude || null)
+          },
         });
+      }
 
-        $scope.showAlert();
-      }, function(error) {
-        console.log("Error:", error);
+      // push the ad id to UserProfile, to keep track of all ads that he posted
+      // record the match_mode, category and tags here for later search
+      var user_ref = FBRef.child("users");
+      user_ref = user_ref.child($scope.authData.facebook.id);
+      user_ref.child("name").set($scope.authData.facebook.displayName);
+      user_ref = user_ref.child("postedAds");
+      user_ref.child(ad_id).set({
+        match_mode : ad_entry.match_mode,
+        category : ad_entry.category,
+        tags : ad_entry.tags
+      });
+
+      $scope.showAlert();
+    }, function(error) {
+      console.log("Error:", error);
     });
     return ad_entry;
   };
@@ -308,31 +328,31 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
 })
 
 .directive('map', function() {
-    return {
-        restrict: 'A',
-        link:function(scope, element, attrs){
+  return {
+    restrict: 'A',
+    link:function(scope, element, attrs){
 
-          var zValue = scope.$eval(attrs.zoom);
-          var lat = scope.$eval(attrs.lat);
-          var lng = scope.$eval(attrs.lng);
-          var myLatlng = new google.maps.LatLng(lat,lng),
-          mapOptions = {
-                zoom: zValue,
-                center: myLatlng
-            },
-          map = new google.maps.Map(element[0],mapOptions);
-          marker = new google.maps.Marker({
-            position: myLatlng,
-            map: map,
-            draggable:true
-          })
-          google.maps.event.addListener(marker, 'dragend', function(evt){
-            scope.$parent.user.latitude = evt.latLng.lat();
-            scope.$parent.user.longitude = evt.latLng.lng();
-            scope.$apply();
+      var zValue = scope.$eval(attrs.zoom);
+      var lat = scope.$eval(attrs.lat);
+      var lng = scope.$eval(attrs.lng);
+      var myLatlng = new google.maps.LatLng(lat,lng),
+      mapOptions = {
+        zoom: zValue,
+        center: myLatlng
+      },
+      map = new google.maps.Map(element[0],mapOptions);
+      marker = new google.maps.Marker({
+        position: myLatlng,
+        map: map,
+        draggable:true
+      })
+      google.maps.event.addListener(marker, 'dragend', function(evt){
+        scope.$parent.user.latitude = evt.latLng.lat();
+        scope.$parent.user.longitude = evt.latLng.lng();
+        scope.$apply();
 
-          });
+      });
 
-        }
-    };
+    }
+  };
 });
