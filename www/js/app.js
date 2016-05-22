@@ -3,9 +3,9 @@
 // angular.module is a global place for creating, registering and retrieving Angular modules
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
-angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInput'])
+angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInput', 'ngCordova'])
 
-.run(function($rootScope, $ionicPlatform) {
+.run(function($rootScope, $ionicPlatform, $cordovaPush) {
   $ionicPlatform.ready(function() {
 
     // PUSH NOTIFICATION THINGS
@@ -16,6 +16,17 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
       console.log("Device token:",token.token);
       push.saveToken(token);
       $rootScope.deviceToken = token.token;
+    });
+
+    var pushP = PushNotification.init({
+      android: {
+        senderID: "445992274665"
+      },
+      ios: {
+        alert: "true",
+        badge: true,
+        sound: "false"
+      },
     });
 
     // OTHER CORDOVA THINGS
@@ -33,7 +44,6 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
       StatusBar.styleDefault();
     }
   });
-
 })
 
 .factory('Auth', function($firebaseAuth) {
@@ -81,7 +91,7 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
         me.child("deviceToken").set($rootScope.deviceToken);
         console.log("Successfully pushed device token " + $rootScope.deviceToken + " for user " + authData.uid + " to Firebase");
       });
-      
+
     }
     $scope.authData = authData;
   });
