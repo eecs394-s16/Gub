@@ -17,6 +17,8 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
         var coords = location.coords;
         var lat    = coords.latitude;
         var lng    = coords.longitude;
+        $scope.user.latitude = lat;
+        $scope.user.longitude = lng;
         console.log('- Location: ', JSON.stringify(location));
 
         // Must signal completion of your callbackFn.
