@@ -89,7 +89,8 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
         break;
 
         case 'message': //actual push notification
-          console.log('message = ' + notification.message + ' msgCount = ' + notification.msgcnt);
+          console.log(notification);
+          alert(notification.payload.title + '\n' + notification.payload.body);
         break;
 
         case 'error': //Error
