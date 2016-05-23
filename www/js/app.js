@@ -7,7 +7,6 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
-
     // Get a reference to the plugin.
     var bgGeo = window.BackgroundGeolocation;
 
