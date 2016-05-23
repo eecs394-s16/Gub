@@ -36,7 +36,67 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
   return itemsRef;
 })
 
-.controller('LoginCtrl', function($rootScope, $scope, $ionicPlatform, $cordovaPush, Auth, FBRef) {
+.factory("Push", function($rootScope, $cordovaPush, $cordovaLocalNotification, FBRef) {
+  /*
+   * Register for Push Notifications
+   * Link the given Facebook UID (uid) with the Push Token
+   */
+  return {
+    "register": function(uid) {
+
+      var androidConfig = {
+        senderID: "445992274665"
+      };
+
+      $cordovaPush.register(androidConfig)
+      .then(function(result) {
+        // SUCCESS
+        console.log("Push Notification Sucess: " + result);
+      }, function(err) {
+        // ERROR
+        console.log("Push Notification Error: " + err);
+      });
+
+      $rootScope.$on('$cordovaPush:notificationReceived', function(event, notification) {
+        switch(notification.event) {
+
+          case 'registered': //register confirmation
+          if (notification.regid.length > 0) {
+            FBRef.child("users").child(uid).child("deviceToken").set(notification.regid);
+            console.log("Facebook ID and push token associated");
+            console.log(notification.regid);
+          }
+          break;
+
+          case 'message': //actual push notification
+          console.log("Push notification received");
+          console.log(notification);
+          console.log(cordova.plugins.notification.local);
+          cordova.plugins.notification.local.schedule({
+            id: 1,
+            text: "You have received a match!"
+          });
+          // $cordovaLocalNotification.schedule({
+          //   id: 1,
+          //   text: "You have received a match!"
+          // });
+          break;
+
+          case 'error': //Error
+          alert('GCM error = ' + notification.msg);
+          break;
+
+          default:
+          alert('An unknown GCM event has occurred');
+          break;
+        }
+
+      });
+    }
+  };
+})
+
+.controller('LoginCtrl', function($scope, $ionicPlatform, Auth, Push) {
   $scope.login = function() {
     Auth.$authWithOAuthRedirect("facebook").then(function(authData) {
       // User successfully logged in
@@ -57,60 +117,13 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
     Auth.$unauth();
   };
 
-  /*
-   * Register for Push Notifications
-   * Link the given Facebook UID (uid) with the Push Token
-   */
-  function pushRegister(uid) {
-
-    var androidConfig = {
-      senderID: "445992274665"
-    };
-
-    $cordovaPush.register(androidConfig)
-    .then(function(result) {
-      // SUCCESS
-      console.log("Push Notification Sucess: " + result);
-    }, function(err) {
-      // ERROR
-      console.log("Push Notification Error: " + err);
-    });
-
-    $rootScope.$on('$cordovaPush:notificationReceived', function(event, notification) {
-      switch(notification.event) {
-
-        case 'registered': //register confirmation
-        if (notification.regid.length > 0) {
-          FBRef.child("users").child(uid).child("deviceToken").set(notification.regid);
-          console.log("Facebook ID and push token associated");
-          console.log(notification.regid);
-        }
-        break;
-
-        case 'message': //actual push notification
-          console.log(notification);
-          alert(notification.payload.title + '\n' + notification.payload.body);
-        break;
-
-        case 'error': //Error
-          alert('GCM error = ' + notification.msg);
-        break;
-
-        default:
-          alert('An unknown GCM event has occurred');
-        break;
-      }
-
-    });
-  }
-
   Auth.$onAuth(function(authData) {
     if (authData === null) {
       console.log("Not logged in yet");
     } else {
       console.log("Logged in with Facebook ID ", authData.facebook.id);
       $ionicPlatform.ready(function() {
-        pushRegister(authData.facebook.id);
+        Push.register(authData.facebook.id);
       });
     }
     $scope.authData = authData;
