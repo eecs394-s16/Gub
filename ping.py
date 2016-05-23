@@ -8,7 +8,7 @@ headers = {
 }
 
 data = {
-    "tokens": ["DEV-9ca74a3a-7836-43e0-b820-ecc46eeba916"],
+    "tokens": ["DEV-aa3d8c6a-4afc-434f-bb17-6c191017581e"],
     "profile": "gub_dev",
     "notification": {
         "title": "Hi!",
