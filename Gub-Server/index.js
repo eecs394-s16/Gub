@@ -191,8 +191,21 @@ sendNotifToUser = function(user_id1, user_id2) {
 
 global.turn_off_notif = true;
 
-clearAllMatches();
+var stdin = process.openStdin();
 
-updateAllMatches();
+stdin.addListener("data", function(d) {
+    // note:  d is an object, and when converted to a string it will
+    // end with a linefeed.  so we (rather crudely) account for that
+    // with toString() and then trim()
+    var str = d.toString().trim();
+    if (str == "clear") {
+      clearAllMatches();
+    } else if (str == "match") {
+      updateAllMatches();
+    } else {
+      console.log("Command not found :(");
+    }
+    console.log("Enter next command: ");
+  });
 
-console.log("All matches updated");
+console.log("Enter next command: ");
