@@ -5,11 +5,11 @@
 // the 2nd parameter is an array of 'requires'
 angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInput', 'ngCordova'])
 
-.run(function($rootScope, $ionicPlatform) {
+.run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
     /*
-     * ~Just Cordova things~
-     */
+    * ~Just Cordova things~
+    */
     if (window.cordova && window.cordova.plugins.Keyboard) {
       // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
       // for form inputs)
@@ -38,9 +38,9 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
 
 .factory("Push", function($rootScope, $cordovaPush, $cordovaLocalNotification, FBRef) {
   /*
-   * Register for Push Notifications
-   * Link the given Facebook UID (uid) with the Push Token
-   */
+  * Register for Push Notifications
+  * Link the given Facebook UID (uid) with the Push Token
+  */
   return {
     "register": function(uid) {
 
@@ -76,10 +76,6 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
             id: 1,
             text: "You have received a match!"
           });
-          // $cordovaLocalNotification.schedule({
-          //   id: 1,
-          //   text: "You have received a match!"
-          // });
           break;
 
           case 'error': //Error
@@ -147,7 +143,7 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
     'Join' : ["Band","Club","Study Group","Volunteer group","Campaign"],
     'Meet' : ["Meet"],
   };
-  for (i in $scope.match_modes) {
+  for (var i in $scope.match_modes) {
     $scope.match_categories[$scope.match_modes[i][1]] = $scope.match_categories[$scope.match_modes[i][0]];
   }
 
@@ -195,7 +191,7 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
     };
     console.log(post);
     return post;
-  }
+  };
 
 
   $scope.pushPost = function(){
@@ -220,7 +216,7 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
       console.log(ad_id);
 
       // push the ad id to TagLib
-      for (t in ad_entry.tags) {
+      for (var t in ad_entry.tags) {
         console.log(t);
         var tl_ref = mm_ref.child(ad_entry.tags[t].text);
         tl_ref.child(ad_id).set({
@@ -258,7 +254,7 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
     user_ref.on("value", function(snapshot) {
       console.log("Looking for matches ...");
       var matched_ads = snapshot.val();
-      for (ad_id in matched_ads) {
+      for (var ad_id in matched_ads) {
         //$scope.matched_ads.push(findAd(ad_id));
         var ref = FBRef.child("ads").child(ad_id);
         ref.on("value", function(snapshot) {
@@ -272,7 +268,7 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
     }, function(errorObject) {
       console.log("Error when finding the match:", errorObject);
     });
-  }
+  };
 
 
 })
@@ -289,7 +285,7 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
 
     // find a match of this post
     var target_match_options = "";
-    for (i in $scope.match_modes) {
+    for (var i in $scope.match_modes) {
       m = $scope.match_modes[i];
       if (post.match_mode == m[0])  target_match_options = m[1];
       if (post.match_mode == m[1])  target_match_options = m[0];
@@ -305,11 +301,11 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
         ref.on("value", function(snapshot) {
           snapshots = snapshot.val();
           // put the id of every valid ad into valid_ad_ids
-          for (key in snapshots) {
+          for (var key in snapshots) {
             // can do any type check here before pushing
             if (snapshots[key].user_id != user_id) {
               if (nearInLocation(snapshots[key].location, post["location"]))
-                $scope.updateThisMatch(user_id, post_id, key);
+              $scope.updateThisMatch(user_id, post_id, key);
             }
           }
         },
@@ -330,10 +326,10 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
     var user_ref = FBRef.child("users").child(user_id).child("postedAds");
     user_ref.on("value", function(snapshot) {
       var all_ads = snapshot.val();
-      for (ad_id1 in all_ads) {
+      for (var ad_id1 in all_ads) {
         var matched_ads = $scope.findMatchForPost(user_id, ad_id1, all_ads[ad_id1]);
         // update the match table with ad_id1 and every ad in matched_ads
-        for (k in matched_ads) {
+        for (var k in matched_ads) {
           var ad_id2 = matched_ads[k];
           // $scope.updateThisMatch(user_id, ad_id1, ad_id2);
         }
@@ -351,7 +347,7 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
       matched_to : ad_id1
     });
 
-  }
+  };
 
   $scope.updateAllMatches = function() {
     //$scope.clearAllMatches();
@@ -360,25 +356,25 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
     var ref = FBRef.child("users");
     ref.on("value", function(snapshot) {
       snapshots = snapshot.val();
-      for (key in snapshots) {
+      for (var key in snapshots) {
         $scope.findMatchForUser(key);
       }
     }, function(errorObject) {
       console.log("Error when getting user ids:", errorObject);
     });
     console.log("Matching completed. ");
-  }
+  };
 
   // for debug purposes, write this to clear every matches that have been done
   $scope.clearAllMatches = function() {
     console.log(Firebase);
-    console.log("Warning: GOING TO CLEAR ALL THE MATCHES. ")
+    console.log("Warning: GOING TO CLEAR ALL THE MATCHES.");
     FBRef.child("matches").set(null);
-  }
+  };
 
   // right now we match everything as long as they are not too far away
   var nearInLocation = function(loc1, loc2) {
-    if (loc1 != null && loc2 != null) {
+    if (loc1 !== null && loc2 !== null) {
       var dist = Math.pow((loc1.longitude - loc2.longitude), 2);
       dist += Math.pow((loc1.latitude - loc2.latitude), 2);
       dist = Math.sqrt(dist);
@@ -387,7 +383,7 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
       }
     }
     return true;
-  }
+  };
 
 
 
@@ -411,7 +407,7 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
         position: myLatlng,
         map: map,
         draggable:true
-      })
+      });
       google.maps.event.addListener(marker, 'dragend', function(evt){
         scope.$parent.user.latitude = evt.latLng.lat();
         scope.$parent.user.longitude = evt.latLng.lng();
