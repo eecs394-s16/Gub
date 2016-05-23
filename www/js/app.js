@@ -7,9 +7,14 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
-    // Get a reference to the plugin.
-    var bgGeo = window.BackgroundGeolocation;
 
+    // Don't sleep
+    cordova.plugins.backgroundMode.enable();
+
+    /*
+     * GEOLOCATION
+     */
+    var bgGeo = window.BackgroundGeolocation;
 
     //This callback will be executed every time a geolocation is recorded in the background.
     var callbackFn = function(location, taskId) {
@@ -27,7 +32,7 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
     // This callback will be executed if a location-error occurs.  Eg: this will be called if user disables location-services.
     var failureFn = function(errorCode) {
         console.warn('- BackgroundGeoLocation error: ', errorCode);
-    }
+    };
 
     // Listen to location events & errors.
     bgGeo.on('location', callbackFn, failureFn);
@@ -64,8 +69,8 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
     });
 
     /*
-    * ~Just Cordova things~
-    */
+     * ~Just Cordova things~
+     */
     if (window.cordova && window.cordova.plugins.Keyboard) {
       // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
       // for form inputs)
@@ -94,9 +99,9 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
 
 .factory("Push", function($rootScope, $cordovaPush, $cordovaLocalNotification, FBRef) {
   /*
-  * Register for Push Notifications
-  * Link the given Facebook UID (uid) with the Push Token
-  */
+   * Register for Push Notifications
+   * Link the given Facebook UID (uid) with the Push Token
+   */
   return {
     "register": function(uid) {
 
