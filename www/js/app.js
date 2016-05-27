@@ -116,8 +116,8 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
           case 'message': //actual push notification
           cordova.plugins.notification.local.schedule({
             id: 1,
-            title: "Gub",
-            text: "You have received a match!",
+            title: notification.payload.title,
+            text: notification.payload.body,
             ongoing: false,
             badge: 1
           });
