@@ -1,0 +1,49 @@
+{
+    "prepare_queue": {
+        "installed": [],
+        "uninstalled": []
+    },
+    "config_munge": {
+        "files": {}
+    },
+    "installed_plugins": {
+        "com.phonegap.plugins.PushPlugin": {
+            "PACKAGE_NAME": "edu.northwestern.eecs394.gub"
+        },
+        "cordova-plugin-console": {
+            "PACKAGE_NAME": "edu.northwestern.eecs394.gub"
+        },
+        "cordova-plugin-device": {
+            "PACKAGE_NAME": "edu.northwestern.eecs394.gub"
+        },
+        "cordova-plugin-inappbrowser": {
+            "PACKAGE_NAME": "edu.northwestern.eecs394.gub"
+        },
+        "cordova-plugin-splashscreen": {
+            "PACKAGE_NAME": "edu.northwestern.eecs394.gub"
+        },
+        "cordova-plugin-statusbar": {
+            "PACKAGE_NAME": "edu.northwestern.eecs394.gub"
+        },
+        "cordova-plugin-whitelist": {
+            "PACKAGE_NAME": "edu.northwestern.eecs394.gub"
+        },
+        "de.appplant.cordova.plugin.local-notification": {
+            "PACKAGE_NAME": "edu.northwestern.eecs394.gub"
+        },
+        "ionic-plugin-keyboard": {
+            "PACKAGE_NAME": "edu.northwestern.eecs394.gub"
+        },
+        "cordova-plugin-background-mode": {
+            "PACKAGE_NAME": "edu.northwestern.eecs394.gub"
+        },
+        "cordova-plugin-mauron85-background-geolocation": {
+            "PACKAGE_NAME": "edu.northwestern.eecs394.gub"
+        }
+    },
+    "dependent_plugins": {
+        "cordova-plugin-app-event": {
+            "PACKAGE_NAME": "edu.northwestern.eecs394.gub"
+        }
+    }
+}
