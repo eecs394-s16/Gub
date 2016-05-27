@@ -77,9 +77,7 @@ sendNotifToUser = function(user_id1, user_id2) {
   // user_id1 posted the ad_id1, and ad_id2 is the ad that matched to ad_id1
   var updateThisMatch = function(user_id1, user_id2, ad_id1, ad_id2) {
     var ref = FBRef.child("matches").child(user_id1);
-    ref.child(ad_id2).set({
-      matched_to : ad_id1
-    });
+    ref.child(ad_id2).child("matched_to").set(ad_id1);
     sendNotifToUser(user_id1, user_id2);
   }
 
@@ -131,18 +129,12 @@ sendNotifToUser = function(user_id1, user_id2) {
   var findMatchForUser = function(user_id) {
     //var matched_ads = findMatchForPost(var post);
 
-    var matched_ads = [];
     // look into the database and scan every ad that this user have posted
     var user_ref = FBRef.child("users").child(user_id).child("postedAds");
     user_ref.on("value", function(snapshot) {
       var all_ads = snapshot.val();
       for (ad_id1 in all_ads) {
-        var matched_ads = findMatchForPost(user_id, ad_id1, all_ads[ad_id1]);
-        // update the match table with ad_id1 and every ad in matched_ads
-        for (k in matched_ads) {
-          var ad_id2 = matched_ads[k];
-          // var updateThisMatch(user_id, ad_id1, ad_id2);
-        }
+        findMatchForPost(user_id, ad_id1, all_ads[ad_id1]);
       }
     }, function(errorObject) {
       console.log("Error when getting ad ids:", errorObject);
