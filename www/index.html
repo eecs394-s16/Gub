@@ -64,11 +64,6 @@
           <button class="item button-full" ng-click="logout()">Logout</button>
         </div>
 
-        <!-- <div ng-controller="serverCtrl" id="server_run" class="list list-inset">
-          <button class="button" ng-click="updateAllMatches()"> Update match table</button>
-          <button class="button" ng-click="clearAllMatches()"> Clear match table</button>
-        </div> -->
-
         <!-- AD CREATION DASHBOARD -->
         <div ng-show="authData" ng-controller="DashCtrl">
           <div class="card">
@@ -149,6 +144,7 @@
                   <div ng-repeat="t in mpost.tags">
                     <a href="#" class="subdued">#{{t.text}}</a>
                   </div>
+                  <button class="button button-full" ng-click="unmatchAd(mpost)">Unmatch This Ad</button>
                 </div>
 
               </div>
