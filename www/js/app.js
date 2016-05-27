@@ -5,68 +5,52 @@
 // the 2nd parameter is an array of 'requires'
 angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInput', 'ngCordova'])
 
-.run(function($ionicPlatform) {
+.run(function($ionicPlatform, $rootScope) {
   $ionicPlatform.ready(function() {
-
-    // Don't sleep
-    cordova.plugins.backgroundMode.enable();
-
     /*
-     * GEOLOCATION
+     * This callback will be executed every time a geolocation is recorded in the background.
      */
-    var bgGeo = window.BackgroundGeolocation;
+    var FBRef = new Firebase("https://gub.firebaseio.com");
+    var callbackFn = function(location) {
+        console.log('[js] BackgroundGeoLocation callback:  ' + location.latitude + ',' + location.longitude);
 
-    //This callback will be executed every time a geolocation is recorded in the background.
-    var callbackFn = function(location, taskId) {
-        var coords = location.coords;
-        var lat    = coords.latitude;
-        var lng    = coords.longitude;
-        $rootScope.latitude = lat;
-        $rootScope.longitude = lng;
-        console.log('- Location: ', JSON.stringify(location));
+        // Do your HTTP request here to POST location to your server.
+        // jQuery.post(url, JSON.stringify(location));
 
-        // Must signal completion of your callbackFn.
-        bgGeo.finish(taskId);
-    };
-
-    // This callback will be executed if a location-error occurs.  Eg: this will be called if user disables location-services.
-    var failureFn = function(errorCode) {
-        console.warn('- BackgroundGeoLocation error: ', errorCode);
-    };
-
-    // Listen to location events & errors.
-    bgGeo.on('location', callbackFn, failureFn);
-
-    // Fired whenever state changes from moving->stationary or vice-versa.
-    bgGeo.on('motionchange', function(isMoving) {
-      console.log('- onMotionChange: ', isMoving);
-    });
-
-    // BackgroundGeoLocation is highly configurable.
-    bgGeo.configure({
-        // Geolocation config
-        // desiredAccuracy: 0,
-        // distanceFilter: 10,
-        // stationaryRadius: 50,
-        locationUpdateInterval: 1000,
-        // fastestLocationUpdateInterval: 5000,
-        //
-        // Activity Recognition config
-        // activityType: 'AutomotiveNavigation',
-        // activityRecognitionInterval: 5000,
-        // stopTimeout: 5,
-
-        // Application config
-        debug: true,
-        stopOnTerminate: false,
-        startOnBoot: true,
-    }, function(state) {
-        // This callback is executed when the plugin is ready to use.
-        console.log('BackgroundGeolocation ready: ', state);
-        if (!state.enabled) {
-            bgGeo.start();
+        /*
+        IMPORTANT:  You must execute the finish method here to inform the native plugin that you're finished,
+        and the background-task may be completed.  You must do this regardless if your HTTP request is successful or not.
+        IF YOU DON'T, ios will CRASH YOUR APP for spending too much time in the background.
+        */
+        console.log($rootScope.userID);
+        if ($rootScope.userID) {
+          FBRef.child('users').child($rootScope.userID.toString()).child('location').child('longitude').set(location.longitude);
+          FBRef.child('users').child($rootScope.userID.toString()).child('location').child('latitude').set(location.latitude);
+          console.log("Geolocation submitted to firebase!");
         }
+
+        backgroundGeoLocation.finish();
+    };
+
+    var failureFn = function(error) {
+        console.log('BackgroundGeoLocation error');
+    };
+
+    // BackgroundGeoLocation is highly configurable. See platform specific configuration options
+    backgroundGeoLocation.configure(callbackFn, failureFn, {
+        desiredAccuracy: 10,
+        stationaryRadius: 20,
+        distanceFilter: 30,
+        debug: true,  // <-- enable this hear sounds for background-geolocation life-cycle.
+        stopOnTerminate: false, // <-- enable this to clear background location settings when the app terminates
+        interval: 60000
     });
+
+    // Turn ON the background-geolocation system.  The user will be tracked whenever they suspend the app.
+    backgroundGeoLocation.start();
+
+    // If you wish to turn OFF background-tracking, call the #stop method.
+    // backgroundGeoLocation.stop();
 
     /*
      * ~Just Cordova things~
@@ -130,12 +114,12 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
           break;
 
           case 'message': //actual push notification
-          console.log("Push notification received");
-          console.log(notification);
-          console.log(cordova.plugins.notification.local);
           cordova.plugins.notification.local.schedule({
             id: 1,
-            text: "You have received a match!"
+            title: "Gub",
+            text: "You have received a match!",
+            ongoing: false,
+            badge: 1
           });
           break;
 
@@ -147,13 +131,12 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
           alert('An unknown GCM event has occurred');
           break;
         }
-
       });
     }
   };
 })
 
-.controller('LoginCtrl', function($scope, $ionicPlatform, Auth, Push) {
+.controller('LoginCtrl', function($rootScope, $scope, $ionicPlatform, Auth, Push) {
   $scope.login = function() {
     Auth.$authWithOAuthRedirect("facebook").then(function(authData) {
       // User successfully logged in
@@ -181,6 +164,7 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
       console.log("Logged in with Facebook ID ", authData.facebook.id);
       $ionicPlatform.ready(function() {
         Push.register(authData.facebook.id);
+        $rootScope.userID = authData.facebook.id;
       });
     }
     $scope.authData = authData;
