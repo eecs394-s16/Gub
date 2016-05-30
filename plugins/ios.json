@@ -10,9 +10,6 @@
         "com.phonegap.plugins.PushPlugin": {
             "PACKAGE_NAME": "edu.northwestern.eecs394.gub"
         },
-        "cordova-plugin-console": {
-            "PACKAGE_NAME": "edu.northwestern.eecs394.gub"
-        },
         "cordova-plugin-device": {
             "PACKAGE_NAME": "edu.northwestern.eecs394.gub"
         },
@@ -32,9 +29,6 @@
             "PACKAGE_NAME": "edu.northwestern.eecs394.gub"
         },
         "ionic-plugin-keyboard": {
-            "PACKAGE_NAME": "edu.northwestern.eecs394.gub"
-        },
-        "cordova-plugin-background-mode": {
             "PACKAGE_NAME": "edu.northwestern.eecs394.gub"
         },
         "cordova-plugin-mauron85-background-geolocation": {

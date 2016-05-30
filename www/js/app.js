@@ -41,9 +41,8 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
         desiredAccuracy: 10,
         stationaryRadius: 20,
         distanceFilter: 30,
-        debug: true,  // <-- enable this hear sounds for background-geolocation life-cycle.
         stopOnTerminate: false, // <-- enable this to clear background location settings when the app terminates
-        interval: 60000
+        interval: 300000        // look every 5 minutes for location
     });
 
     // Turn ON the background-geolocation system.  The user will be tracked whenever they suspend the app.
@@ -118,8 +117,7 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
             id: 1,
             title: notification.payload.title,
             text: notification.payload.body,
-            ongoing: false,
-            badge: 1
+            ongoing: false
           });
           break;
 

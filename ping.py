@@ -9,7 +9,6 @@ headers = {
 
 data = {
     "registration_ids": ["APA91bFmjDxamCSDZ-mwauTHo0BIGNrqr6Fo2oCH3sii8Nizu3P6JFqG-2Ti6xixrcWvWNzlhMZH9PgwLTOMBh82g9zEPsZBPanWX6U_s2txrRIqSsiAFRPyH-yH1rEJMkR-SYFn_Lic"],
-    "message": "hello",
     "notification": {
         "alert": "Test",
         "title": "New test",
