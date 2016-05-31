@@ -172,7 +172,7 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
 
 .controller('DashCtrl', function($scope, $firebaseArray, $ionicPopup, FBRef) {
 
-  //initialize the global variables for this view
+  //initialize the global variables for the page
   $scope.post = {};
 
   // hardcoding the options of every match mode
@@ -190,32 +190,31 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
     $scope.match_categories[$scope.match_modes[i][1]] = $scope.match_categories[$scope.match_modes[i][0]];
   }
 
-  // initialize some options
+  // initialize some default options and data fields
   $scope.post.match_mode = "Lease";
   $scope.user = {};
   $scope.post.tags = [];
   $scope.matched_ads = [];
 
-
+  // returns whether cm is the current match mode.
   $scope.isCurrentMatch = function(cm) {
-    // console.log("called isCurrentMatch\n"+cm);
     return $scope.post.match_mode === cm;
   };
 
-
+  // set the current match mode to type.
   $scope.setCurrentMatch = function(type) {
-    // console.log("calling setCurrentMatch\n"+type);
     $scope.post.match_mode = type;
   };
 
-
-  $scope.showAlert = function() {
+  // pop-up an alert after submission is completed.
+  $scope.showSubmissionAlert = function() {
     $ionicPopup.alert({
       title: 'Gub',
       template: 'Post submitted!!'
     });
   };
 
+  // going through the user input on the page and generate the object to be pushed to the Firebase
   $scope.GeneratePostToSubmit = function() {
     var post = {
       user_id: $scope.authData.facebook.id,
@@ -236,7 +235,7 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
     return post;
   };
 
-
+  // the function that, once called, submit the current ad to the Firebase
   $scope.pushPost = function(){
     if (!($scope.post.headline && $scope.post.description && $scope.post.category)) {
       $ionicPopup.alert({
@@ -251,14 +250,14 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
     var mm_ref = FBRef.child("taglibrary");
     mm_ref = mm_ref.child(ad_entry.match_mode);
 
-    // add the post on ads
+    // add the post on the "ads" branch
     var ads_ref = FBRef.child("ads");
     var fbarray = $firebaseArray(ads_ref);
     fbarray.$add(ad_entry).then(function(the_ref){
       ad_id = the_ref.key();
-      console.log(ad_id);
 
-      // push the ad id to TagLib
+      // push the ad id to TagLib under the directory
+      // record the match criteria (tags and location) only
       for (var t in ad_entry.tags) {
         console.log(t);
         var tl_ref = mm_ref.child(ad_entry.tags[t].text);
@@ -282,14 +281,15 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
         category : ad_entry.category,
         tags : ad_entry.tags
       });
-
-      $scope.showAlert();
+      $scope.showSubmissionAlert();
     }, function(error) {
       console.log("Error:", error);
     });
     return ad_entry;
   };
 
+  // go through the Firebase and extract ads that are matched for this user
+  // this process make take a bit of time
   $scope.findMatch = function() {
 
     $scope.matched_ads = [];
@@ -315,7 +315,7 @@ angular.module('starter', ['ionic','ionic.service.core', 'firebase', 'ngTagsInpu
     });
   };
 
-
+  // unmatch this ad so that it is no longer matched.
   $scope.unmatchAd = function(ad) {
     var ref = FBRef.child("matches").child($scope.authData.facebook.id).child(ad.ad_id);
     ref.child("unmatch").set('true');

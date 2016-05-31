@@ -29,7 +29,6 @@ var FBRef = new Firebase("https://gub.firebaseio.com");
 var global = {};
 global.match_modes = [["Buy", "Sell"], ["Rent", "Lease"], ["Find", "Give"], ["Work", "Hire"], ["Do", "Task"], ["Join", "Recruit"], ["Meet", "Meet"]];
 
-
 sendNotifToUser = function(user_id1, user_id2) {
   // send notification to the user user_id1, saying it's matched with ad_id2
 
@@ -181,7 +180,7 @@ sendNotifToUser = function(user_id1, user_id2) {
 
 //sendNotif();
 
-global.turn_off_notif = true;
+global.turn_off_notif = false;
 
 var stdin = process.openStdin();
 
@@ -194,7 +193,15 @@ stdin.addListener("data", function(d) {
       clearAllMatches();
     } else if (str == "match") {
       updateAllMatches();
-    } else {
+    } else if (str == "turn on notif") {
+      global.turn_off_notif = false;
+    } else if (str == "turn off notif") {
+      global.turn_off_notif = true;
+    } else if (str == "test sending notif") {
+      sendNotifToUser(850798281690905, 10208980954059337);
+      sendNotifToUser(10208980954059337, 850798281690905);
+    }
+    else {
       console.log("Command not found :(");
     }
     console.log("Enter next command: ");
