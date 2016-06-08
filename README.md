@@ -24,3 +24,9 @@ Michael Wang, Hayley Hu, Ivy Zheng, Sachin Lal, Athif Wulandana
 4. `ionic platform add android`
 5. `ionic run ios` for ios and `ionic run android` for android
   * Your phone need to be plugged in, 'USB debugging' on for Android and XCode installed for iOS
+
+## Installing and Using the Server
+
+1. Install Node.js
+2. In the Gub-Server directory, `node index.js`
+3. Type "match" in the console to perform matches among all users and send notifications to them
